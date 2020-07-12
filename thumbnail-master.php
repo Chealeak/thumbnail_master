@@ -34,3 +34,33 @@ if (!function_exists('add_action')) {
     echo 'You can\'t access this file!';
     exit;
 }
+
+class ThumbnailMaster
+{
+    public function __construct()
+    {
+
+    }
+
+    private function activate()
+    {
+        // activate plugin logic
+    }
+
+    private function deactivate()
+    {
+        // deactivate plugin logic
+    }
+
+    private function uninstall()
+    {
+        // uninstall plugin logic
+    }
+}
+
+if (class_exists('ThumbnailMaster')) {
+    $thumbnailMaster = new ThumbnailMaster();
+}
+
+register_activation_hook(__FILE__, [$thumbnailMaster, 'activate']);
+register_deactivation_hook(__FILE__, [$thumbnailMaster, 'deactivate']);
