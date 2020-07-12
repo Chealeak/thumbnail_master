@@ -31,6 +31,6 @@ Copyright 2005-2015 Automattic, Inc.
 */
 
 if (!function_exists('add_action')) {
-    echo 'Hi there!  I\'m just a plugin, not much I can do when called directly.';
+    echo 'You can\'t access this file!';
     exit;
 }
