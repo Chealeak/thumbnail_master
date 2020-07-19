@@ -30,6 +30,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 Copyright 2005-2015 Automattic, Inc.
 */
 
+require_once ('Service.php');
+require_once ('Services/GenerateThumbnails.php'); // TODO: dynamic definition
+
 if (!function_exists('add_action')) {
     echo 'You can\'t access this file!';
     exit;
@@ -37,9 +40,12 @@ if (!function_exists('add_action')) {
 
 class ThumbnailMaster
 {
+    private $services = [];
+
     public function __construct()
     {
-
+        $this->createServiceContainer();
+        $this->registerServices();
     }
 
     private function activate()
@@ -55,6 +61,25 @@ class ThumbnailMaster
     private function uninstall()
     {
         // uninstall plugin logic
+    }
+
+    private function createServiceContainer()
+    {
+        $serviceFileNames = array_diff(scandir(__DIR__ . '/Services'), ['.', '..']);
+        foreach ($serviceFileNames as $serviceFileName) {
+            $serviceClassName = basename($serviceFileName, '.php');
+            if (class_exists($serviceClassName)) {
+                $service = new $serviceClassName();
+                $this->services[] = $service;
+            }
+        }
+    }
+
+    private function registerServices()
+    {
+        foreach ($this->services as $service) {
+            $service->register();
+        }
     }
 }
 
