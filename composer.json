@@ -1,0 +1,15 @@
+{
+    "name": "dreamspiros/thumbnail-master",
+    "type": "project",
+    "license": "GPL",
+    "authors": [
+        {
+            "name": "Andrew Tolpeko",
+            "email": "andriush@mail.ru"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {"ThumbnailMaster\\": "."}
+    }
+}

@@ -30,12 +30,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 Copyright 2005-2015 Automattic, Inc.
 */
 
-require_once ('Service.php');
-require_once ('Services/GenerateThumbnails.php'); // TODO: dynamic definition
-
 if (!function_exists('add_action')) {
     echo 'You can\'t access this file!';
     exit;
+}
+
+if (file_exists(dirname(__FILE__) . '/vendor/autoload.php')) {
+    require_once dirname(__FILE__) . '/vendor/autoload.php';
 }
 
 class ThumbnailMaster
@@ -65,11 +66,14 @@ class ThumbnailMaster
 
     private function createServiceContainer()
     {
+        $serviceNamespace = "ThumbnailMaster\\Services\\";
+
         $serviceFileNames = array_diff(scandir(__DIR__ . '/Services'), ['.', '..']);
         foreach ($serviceFileNames as $serviceFileName) {
             $serviceClassName = basename($serviceFileName, '.php');
-            if (class_exists($serviceClassName)) {
-                $service = new $serviceClassName();
+            $serviceNameWithNamespace = $serviceNamespace . $serviceClassName;
+            if (class_exists($serviceNameWithNamespace)) {
+                $service = new $serviceNameWithNamespace();
                 $this->services[] = $service;
             }
         }

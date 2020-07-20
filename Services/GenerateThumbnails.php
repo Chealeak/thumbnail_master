@@ -1,6 +1,10 @@
 <?php
 
-class GenerateThumbnails
+namespace ThumbnailMaster\Services;
+
+use ThumbnailMaster\Service;
+
+class GenerateThumbnails implements Service
 {
     public function register()
     {
