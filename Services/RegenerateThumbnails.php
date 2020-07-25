@@ -6,12 +6,18 @@ use ThumbnailMaster\Service;
 
 class RegenerateThumbnails implements Service
 {
+    public function __construct()
+    {
+        $this->enqueueScriptsAndStyles();
+        $this->setAjaxRegenerationHandler();
+    }
+
     public function register()
     {
         add_action('admin_menu', [$this, 'addAdminPage']);
         add_action('admin_init', [$this, 'adminPageInit']);
 
-        //$this->regenerate(); // TODO: temporary!!!
+        //$this->regenerate();
     }
 
     public function addAdminPage()
@@ -41,6 +47,7 @@ class RegenerateThumbnails implements Service
                     submit_button();
                 ?>
             </form>
+            <button class="th_m_regenerate-button-js">Regenerate</button>
         </div>
         <?php
     }
@@ -93,6 +100,31 @@ class RegenerateThumbnails implements Service
         );
     }
 
+    private function enqueueScriptsAndStyles()
+    {
+        add_action('admin_enqueue_scripts', function () {
+            wp_enqueue_script('th_m_regenerate-ajax-handler', plugin_dir_url(__DIR__) . 'assets/js/regenerate-ajax-handler.js', ['jquery'], null, true);
+            wp_localize_script('th_m_regenerate-ajax-handler', 'regenerate_ajax_handler',
+                [
+                    'ajaxurl' => admin_url('admin-ajax.php'),
+                    'testParamName' => 'testParamValue'
+                ]
+            );
+        });
+    }
+
+    private function setAjaxRegenerationHandler()
+    {
+        add_action('wp_ajax_th_m_regenerate_thumbnails', [$this, 'regenerateWithAjax']);
+    }
+
+    public function regenerateWithAjax()
+    {
+        $this->regenerate();
+
+        wp_die();
+    }
+
     public function regenerate()
     {
         global $wpdb;
@@ -104,7 +136,7 @@ class RegenerateThumbnails implements Service
             //if (!file_exists($imageFullSizePath)) {
                 require_once( ABSPATH . 'wp-admin/includes/admin.php' );
                 require_once( ABSPATH . 'wp-includes/pluggable.php' );
-                add_image_size('test_size', 700, 700, true);
+                add_image_size('test_size', 200, 200, true);
 
                 if (wp_update_attachment_metadata($image->ID, wp_generate_attachment_metadata($image->ID, $imageFullSizePath))) {
 
