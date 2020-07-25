@@ -9,18 +9,88 @@ class RegenerateThumbnails implements Service
     public function register()
     {
         add_action('admin_menu', [$this, 'addAdminPage']);
+        add_action('admin_init', [$this, 'adminPageInit']);
 
-        $this->regenerate(); // TODO: temporary!!!
+        //$this->regenerate(); // TODO: temporary!!!
     }
 
     public function addAdminPage()
     {
-        add_menu_page('Regenerate Thumbnails', 'Regenerate Thumbnails', 'manage_options', 'th_m_regenerate_thumbnails', [$this, 'renderAdminPage']);
+        add_menu_page('Thumbnail Master', 'Thumbnail Master', 'manage_options', 'th_m_regenerate_thumbnails', function (){});
+        add_submenu_page('th_m_regenerate_thumbnails', 'Regenerate Thumbnails', 'Regenerate Thumbnails', 'manage_options', 'th_m_regenerate_thumbnails', function (){});
+
+        add_options_page(
+            'Settings Admin',
+            'My Settings',
+            'manage_options',
+            'th_m_regenerate_thumbnails',
+            [$this, 'renderAdminPage']
+        );
     }
 
     public function renderAdminPage()
     {
-        echo '<h1>Generate Thumbnails</h1>';
+        $this->options = get_option( 'my_option_name' );
+        ?>
+        <div class="wrap">
+            <h1>Regenerate Thumbnails Settings</h1>
+            <form method="post" action="options.php">
+                <?php
+                    settings_fields( 'my_option_group' );
+                    do_settings_sections( 'my-setting-admin' );
+                    submit_button();
+                ?>
+            </form>
+        </div>
+        <?php
+    }
+
+    public function adminPageInit()
+    {
+        register_setting(
+            'my_option_group',
+            'my_option_name',
+            array( $this, 'sanitize' )
+        );
+
+        add_settings_section(
+            'setting_section_id',
+            'My Custom Settings',
+            array( $this, 'print_section_info' ),
+            'my-setting-admin'
+        );
+
+        add_settings_field(
+            'title',
+            'Title',
+            array( $this, 'title_callback' ),
+            'my-setting-admin',
+            'setting_section_id'
+        );
+    }
+
+    public function sanitize( $input )
+    {
+        $new_input = array();
+
+        if( isset( $input['title'] ) ) {
+            $new_input['title'] = sanitize_text_field( $input['title'] );
+        }
+
+        return $new_input;
+    }
+
+    public function print_section_info()
+    {
+        print 'Enter your settings below:';
+    }
+
+    public function title_callback()
+    {
+        printf(
+            '<input type="text" id="title" name="my_option_name[title]" value="%s" />',
+            isset( $this->options['title'] ) ? esc_attr( $this->options['title']) : ''
+        );
     }
 
     public function regenerate()
