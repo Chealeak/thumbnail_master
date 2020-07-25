@@ -72,6 +72,7 @@ class ThumbnailMaster
         foreach ($serviceFileNames as $serviceFileName) {
             $serviceClassName = basename($serviceFileName, '.php');
             $serviceNameWithNamespace = $serviceNamespace . $serviceClassName;
+
             if (class_exists($serviceNameWithNamespace)) {
                 $service = new $serviceNameWithNamespace();
                 $this->services[] = $service;
