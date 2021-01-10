@@ -36,7 +36,7 @@ class RegenerateThumbnails implements Service
 
     public function renderAdminPage()
     {
-        $this->options = get_option( 'my_option_name' );
+        $this->options = get_option('my_option_name');
         ?>
         <div class="wrap">
             <h1>Regenerate Thumbnails Settings</h1>
@@ -48,6 +48,7 @@ class RegenerateThumbnails implements Service
                 ?>
             </form>
             <button class="th_m_regenerate-button-js">Regenerate</button>
+            <div id="th_m_progressbar" class="ldBar"></div>
         </div>
         <?php
     }
@@ -81,7 +82,7 @@ class RegenerateThumbnails implements Service
         $new_input = array();
 
         if( isset( $input['title'] ) ) {
-            $new_input['title'] = sanitize_text_field( $input['title'] );
+            $new_input['title'] = sanitize_text_field($input['title']);
         }
 
         return $new_input;
@@ -95,7 +96,7 @@ class RegenerateThumbnails implements Service
     public function title_callback()
     {
         printf(
-            '<input type="text" id="title" name="my_option_name[title]" value="%s" />',
+            '<input type="text" id="title" name="my_option_name[title]" value="%s"/>',
             isset( $this->options['title'] ) ? esc_attr( $this->options['title']) : ''
         );
     }
@@ -110,6 +111,9 @@ class RegenerateThumbnails implements Service
                     'testParamName' => 'testParamValue'
                 ]
             );
+            wp_enqueue_script('th_m_loading-bar', plugin_dir_url(__DIR__) . 'assets/js/loading-bar.min.js', ['jquery'], null, true);
+            wp_enqueue_style('th_m_loading-bar', plugin_dir_url(__DIR__) . 'assets/css/loading-bar.min.css');
+            wp_enqueue_script('th_m_common', plugin_dir_url(__DIR__) . 'assets/js/common.js', ['jquery'], null, true);
         });
     }
 
@@ -127,23 +131,22 @@ class RegenerateThumbnails implements Service
 
     public function regenerate()
     {
+        require_once(ABSPATH . 'wp-admin/includes/admin.php');
+        require_once(ABSPATH . 'wp-includes/pluggable.php');
+
         global $wpdb;
-        $imagesExisted = $wpdb->get_results( "SELECT ID FROM $wpdb->posts WHERE post_type = 'attachment' AND post_mime_type LIKE 'image/%'" );
+        $imagesExisted = $wpdb->get_results( "SELECT ID FROM $wpdb->posts WHERE post_type='attachment' AND post_mime_type LIKE 'image/%'" );
 
         foreach ($imagesExisted as $image) {
             $imageFullSizePath = get_attached_file($image->ID);
 
-            //if (!file_exists($imageFullSizePath)) {
-                require_once( ABSPATH . 'wp-admin/includes/admin.php' );
-                require_once( ABSPATH . 'wp-includes/pluggable.php' );
-                add_image_size('test_size', 200, 200, true);
-
+            if (file_exists($imageFullSizePath)) {
                 if (wp_update_attachment_metadata($image->ID, wp_generate_attachment_metadata($image->ID, $imageFullSizePath))) {
 
                 } else {
 
                 }
-            //}
+            }
         }
     }
 }

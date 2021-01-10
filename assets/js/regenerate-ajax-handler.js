@@ -1,5 +1,7 @@
 jQuery(document).ready(function() {
     jQuery('.th_m_regenerate-button-js').click(function () {
+        var bar = new ldBar("#th_m_progressbar");
+
         jQuery.ajax({
             url: regenerate_ajax_handler.ajaxurl,
             type: 'POST',
@@ -9,7 +11,17 @@ jQuery(document).ready(function() {
             },
             success: function(data) {
                 jQuery('.th_m_regenerate-button-js').text('Generate');
-                //alert( data );
+            },
+            xhr: function() {
+                var xhr = new XMLHttpRequest();
+                xhr.onprogress = function(event) {
+                    if (event.lengthComputable === false) {
+                        bar.set((event.loaded / event.total) * 100);
+                    } else {
+                        bar.set(event.loaded);
+                    }
+                };
+                return xhr;
             }
         });
     });
