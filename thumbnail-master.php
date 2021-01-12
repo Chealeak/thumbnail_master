@@ -41,6 +41,9 @@ if (file_exists(dirname(__FILE__) . '/vendor/autoload.php')) {
 
 class ThumbnailMaster
 {
+    const PLUGIN_PREFIX = 'th_m_';
+    const ADMIN_PAGE = 'setting-admin';
+
     private $services = [];
 
     public function __construct()
@@ -84,6 +87,8 @@ class ThumbnailMaster
     {
         foreach ($this->services as $service) {
             $service->register();
+            $service->setPrefix(self::PLUGIN_PREFIX);
+            $service->setAdminPage(self::ADMIN_PAGE);
         }
     }
 }
