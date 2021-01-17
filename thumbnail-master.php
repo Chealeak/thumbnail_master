@@ -39,17 +39,27 @@ if (file_exists(dirname(__FILE__) . '/vendor/autoload.php')) {
     require_once dirname(__FILE__) . '/vendor/autoload.php';
 }
 
-class ThumbnailMaster
+final class ThumbnailMaster
 {
     const PLUGIN_PREFIX = 'th_m_';
     const ADMIN_PAGE = 'setting-admin';
 
-    private $services = [];
+    private static $instance;
+    private array $services = [];
 
     public function __construct()
     {
         $this->createServiceContainer();
         $this->registerServices();
+    }
+
+    public static function getInstance(): self
+    {
+        if (is_null(self::$instance)) {
+            self::$instance = new self();
+        }
+
+        return self::$instance;
     }
 
     private function activate()
@@ -92,7 +102,7 @@ class ThumbnailMaster
 }
 
 if (class_exists('ThumbnailMaster')) {
-    $thumbnailMaster = new ThumbnailMaster();
+    $thumbnailMaster = ThumbnailMaster::getInstance();
 
     register_activation_hook(__FILE__, [$thumbnailMaster, 'activate']);
     register_deactivation_hook(__FILE__, [$thumbnailMaster, 'deactivate']);

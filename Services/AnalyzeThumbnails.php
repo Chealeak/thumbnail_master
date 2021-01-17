@@ -12,16 +12,6 @@ class AnalyzeThumbnails extends Service
         add_action('admin_init', [$this, 'adminPageInit']);
     }
 
-    public function setPrefix($prefix)
-    {
-        $this->prefix = $prefix;
-    }
-
-    public function setAdminPage($adminPage)
-    {
-        $this->adminPage = $adminPage;
-    }
-
     public function adminPageInit()
     {
         /*        register_setting(
@@ -33,7 +23,7 @@ class AnalyzeThumbnails extends Service
         add_settings_section(
             $this->prefix . 'setting_section_analysis',
             'Analysis',
-            [$this, 'printAnalysisSectionInfo'],
+            [$this, 'printSectionInfo'],
             $this->prefix . $this->adminPage
         );
 
@@ -46,7 +36,7 @@ class AnalyzeThumbnails extends Service
                 );*/
     }
 
-    public function printAnalysisSectionInfo()
+    public function printSectionInfo()
     {
         // add_image_size('test_size', 555, 555, true);
 

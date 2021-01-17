@@ -14,16 +14,6 @@ class RegenerateThumbnails extends Service
         //$this->regenerate();
     }
 
-    public function setPrefix($prefix)
-    {
-        $this->prefix = $prefix;
-    }
-
-    public function setAdminPage($adminPage)
-    {
-        $this->adminPage = $adminPage;
-    }
-
     public function addAdminPage()
     {
         add_menu_page('Thumbnail Master',
