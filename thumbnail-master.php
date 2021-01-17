@@ -77,7 +77,7 @@ class ThumbnailMaster
             $serviceNameWithNamespace = $serviceNamespace . $serviceClassName;
 
             if (class_exists($serviceNameWithNamespace)) {
-                $service = new $serviceNameWithNamespace();
+                $service = new $serviceNameWithNamespace(self::PLUGIN_PREFIX, self::ADMIN_PAGE);
                 $this->services[] = $service;
             }
         }
@@ -87,15 +87,13 @@ class ThumbnailMaster
     {
         foreach ($this->services as $service) {
             $service->register();
-            $service->setPrefix(self::PLUGIN_PREFIX);
-            $service->setAdminPage(self::ADMIN_PAGE);
         }
     }
 }
 
 if (class_exists('ThumbnailMaster')) {
     $thumbnailMaster = new ThumbnailMaster();
-}
 
-register_activation_hook(__FILE__, [$thumbnailMaster, 'activate']);
-register_deactivation_hook(__FILE__, [$thumbnailMaster, 'deactivate']);
+    register_activation_hook(__FILE__, [$thumbnailMaster, 'activate']);
+    register_deactivation_hook(__FILE__, [$thumbnailMaster, 'deactivate']);
+}

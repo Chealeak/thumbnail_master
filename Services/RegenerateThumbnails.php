@@ -4,16 +4,8 @@ namespace ThumbnailMaster\Services;
 
 use ThumbnailMaster\Service;
 
-class RegenerateThumbnails implements Service
+class RegenerateThumbnails extends Service
 {
-    private $prefix = '';
-
-    public function __construct()
-    {
-        $this->enqueueScriptsAndStyles();
-        $this->setAjaxRegenerationHandler();
-    }
-
     public function register()
     {
         add_action('admin_menu', [$this, 'addAdminPage']);

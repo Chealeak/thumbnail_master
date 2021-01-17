@@ -2,9 +2,16 @@
 
 namespace ThumbnailMaster;
 
-interface Service
+abstract class Service
 {
-    public function register();
-    public function setPrefix($prefix);
-    public function setAdminPage($adminPage);
+    protected string $prefix;
+    protected string $adminPage;
+
+    public function __construct(string $prefix, string $adminPage)
+    {
+        $this->prefix = $prefix;
+        $this->adminPage = $adminPage;
+    }
+
+    abstract public function register();
 }

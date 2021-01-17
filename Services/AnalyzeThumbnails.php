@@ -4,16 +4,8 @@ namespace ThumbnailMaster\Services;
 
 use ThumbnailMaster\Service;
 
-class AnalyzeThumbnails implements Service
+class AnalyzeThumbnails extends Service
 {
-    private $prefix = '';
-    private $adminPage = null;
-
-    public function __construct()
-    {
-
-    }
-
     public function register()
     {
 /*        add_action('admin_menu', [$this, 'addAdminPage']);*/
