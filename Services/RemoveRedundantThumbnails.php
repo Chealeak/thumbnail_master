@@ -23,6 +23,29 @@ class RemoveRedundantThumbnails extends Service
 
     public function printSectionInfo()
     {
+        $attachmentArgs = [
+            'post_type'      => 'attachment',
+            'post_mime_type' => 'image',
+            'post_status'    => 'any',
+            'fields'         => 'ids',
+        ];
+
+        $attachmentQuery = new \WP_Query($attachmentArgs);
+
+        foreach ($attachmentQuery->posts as $attachmentId) {
+            $attachmentMeta = wp_get_attachment_metadata($attachmentId);
+            $uploadDirectory = wp_upload_dir();
+            $pathToFileDirectory = str_replace(basename($attachmentMeta['file']), '', trailingslashit($uploadDirectory['basedir']) . $attachmentMeta['file']);
+
+            foreach ($attachmentMeta['sizes'] as $size => $info) {
+                $filePath = realpath( $pathToFileDirectory . $info['file'] );
+                //unlink($filePath); // TODO: uncomment
+                //unset($attachmentMeta['sizes'][ $size ]); // TODO: uncomment
+            }
+
+            wp_update_attachment_metadata($attachmentId, $attachmentMeta);
+        }
+
         ?>
             <div class="wrap">
                 <h1>Remove Redundant Thumbnails</h1>
