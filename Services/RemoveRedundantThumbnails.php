@@ -9,6 +9,8 @@ class RemoveRedundantThumbnails extends Service
     public function register()
     {
         add_action('admin_init', [$this, 'adminPageInit']);
+        $this->enqueueScriptsAndStyles();
+        $this->setAjaxRemoveRedundantHandler();
     }
 
     public function adminPageInit()
@@ -23,6 +25,33 @@ class RemoveRedundantThumbnails extends Service
 
     public function printSectionInfo()
     {
+        ?>
+            <div class="wrap">
+                <h1>Remove Redundant Thumbnails</h1>
+                <button class="th_m_remove-redundant-button-js">Remove</button>
+            </div>
+        <?php
+    }
+
+    private function enqueueScriptsAndStyles()
+    {
+        add_action('admin_enqueue_scripts', function () {
+            wp_enqueue_script($this->prefix . 'remove-redundant-ajax-handler', plugin_dir_url(__DIR__) . 'assets/js/remove-redundant-ajax-handler.js', ['jquery'], null, true);
+            wp_localize_script($this->prefix . 'remove-redundant-ajax-handler', 'remove_redundant_ajax_handler',
+                [
+                    'ajaxurl' => admin_url('admin-ajax.php')
+                ]
+            );
+        });
+    }
+
+    private function setAjaxRemoveRedundantHandler()
+    {
+        add_action('wp_ajax_' . $this->prefix . 'remove_redundant_thumbnails', [$this, 'removeThumbnails']);
+    }
+
+    public function removeThumbnails()
+    {
         $attachmentArgs = [
             'post_type'      => 'attachment',
             'post_mime_type' => 'image',
@@ -32,25 +61,32 @@ class RemoveRedundantThumbnails extends Service
 
         $attachmentQuery = new \WP_Query($attachmentArgs);
 
+        $existedImageSizeNames = [];
+        global $_wp_additional_image_sizes;
+
+        if (!empty($_wp_additional_image_sizes)) {
+            $existedImageSizeNames = array_keys($_wp_additional_image_sizes);
+        }
+
         foreach ($attachmentQuery->posts as $attachmentId) {
             $attachmentMeta = wp_get_attachment_metadata($attachmentId);
             $uploadDirectory = wp_upload_dir();
             $pathToFileDirectory = str_replace(basename($attachmentMeta['file']), '', trailingslashit($uploadDirectory['basedir']) . $attachmentMeta['file']);
-
             foreach ($attachmentMeta['sizes'] as $size => $info) {
-                $filePath = realpath( $pathToFileDirectory . $info['file'] );
-                //unlink($filePath); // TODO: uncomment
-                //unset($attachmentMeta['sizes'][ $size ]); // TODO: uncomment
+                if (!in_array($size, $existedImageSizeNames)) {
+                    $filePath = realpath($pathToFileDirectory . $info['file']);
+                    unlink($filePath);
+                    unset($attachmentMeta['sizes'][$size]);
+                }
             }
 
-            wp_update_attachment_metadata($attachmentId, $attachmentMeta);
+            if (!empty($attachmentMeta['sizes'])) {
+                wp_update_attachment_metadata($attachmentId, $attachmentMeta);
+            }
         }
 
-        ?>
-            <div class="wrap">
-                <h1>Remove Redundant Thumbnails</h1>
-                <button>Remove</button>
-            </div>
-        <?php
+        if (DOING_AJAX) {
+            wp_die();
+        }
     }
 }
