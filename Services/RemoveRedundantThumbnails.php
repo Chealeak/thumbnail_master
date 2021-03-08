@@ -68,7 +68,7 @@ class RemoveRedundantThumbnails extends Service
 
         $attachmentQuery = new \WP_Query($attachmentArgs);
 
-/*        $existedImageSizeNames = [];
+        $existedImageSizeNames = [];
         global $_wp_additional_image_sizes;
 
         if (!empty($_wp_additional_image_sizes)) {
@@ -90,7 +90,7 @@ class RemoveRedundantThumbnails extends Service
             if (!empty($attachmentMeta['sizes'])) {
                 wp_update_attachment_metadata($attachmentId, $attachmentMeta);
             }
-        }*/
+        }
 
         if (DOING_AJAX) {
             wp_send_json([
