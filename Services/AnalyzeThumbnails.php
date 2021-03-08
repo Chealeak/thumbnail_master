@@ -38,14 +38,13 @@ class AnalyzeThumbnails extends Service
 
     public function printSectionInfo()
     {
-        // add_image_size('test_size', 555, 555, true);
-
         $table = '<table>';
 
         $table .= '<tr>';
         $table .= '<th>Name</th>';
         $table .= '<th>Size</th>';
         $table .= '<th>Crop</th>';
+        $table .= '<th>Actions</th>';
         $table .= '</tr>';
 
         $existedThumbnailsInfo = $this->getExistedThumbnailsInfo();
@@ -54,12 +53,40 @@ class AnalyzeThumbnails extends Service
             $table .= "<td>{$thumbnailName}</td>";
             $table .= "<td>{$thumbnailInfo['width']}x{$thumbnailInfo['height']}</td>";
             $table .= "<td>" . ($thumbnailInfo['crop'] ? 'Yes' : 'No') . "</td>";
+            $table .= "
+                <td>
+                    <button class='button button-primary'>Analyze</button>
+                    <button class='button button-primary'>Disable</button>
+                    <button class='button button-primary'>Regenerate</button>
+                    <button class='button button-primary'>Remove redundant</button>
+                </td>
+            ";
             $table .= '</tr>';
         }
 
         $table .= '</table>';
 
-        echo $table;
+        $allImages = '<h2>All images</h2>';
+        $allImages .= "
+            <td>
+                <button class='button button-primary'>Regenerate</button>
+                <button class='button button-primary'>Remove redundant</button>
+                <button class='button button-primary'>Backup uploads</button>
+            </td>
+        ";
+
+        $checkboxes = "<form method='post' action='options.php'>";
+        $checkboxes .= "
+            <div>
+                <div><input type='checkbox'>Enable regeneration on fly</div>
+                <div><input type='checkbox'>Enable responsive images</div>
+                <div><input type='checkbox'>Enable WebP</div>
+            </div>
+        ";
+        $checkboxes .= "<p class='submit'><input type='submit' name='submit' id='submit' class='button button-primary' value='Save Changes'></p>";
+        $checkboxes .= "</form>";
+
+        echo $table . $allImages . $checkboxes;
     }
 
     private function getExistedThumbnailsInfo()
