@@ -55,10 +55,10 @@ class AnalyzeThumbnails extends Service
             $table .= "<td>" . ($thumbnailInfo['crop'] ? 'Yes' : 'No') . "</td>";
             $table .= "
                 <td>
-                    <button class='button button-primary'>Analyze</button>
-                    <button class='button button-primary'>Disable</button>
-                    <button class='button button-primary'>Regenerate</button>
-                    <button class='button button-primary'>Remove redundant</button>
+                    <button class='button button-primary' data-thumbnail-name='" . $thumbnailName . "'>Analyze</button>
+                    <button class='button button-primary' data-thumbnail-name='" . $thumbnailName . "'>Disable</button>
+                    <button class='button button-primary' data-thumbnail-name='" . $thumbnailName . "'>Regenerate</button>
+                    <button class='button button-primary' data-thumbnail-name='" . $thumbnailName . "'>Remove redundant</button>
                 </td>
             ";
             $table .= '</tr>';
@@ -95,57 +95,20 @@ class AnalyzeThumbnails extends Service
 
         $sizes = [];
 
-        foreach (get_intermediate_image_sizes() as $_size) {
-            if (in_array($_size, array('thumbnail', 'medium', 'medium_large', 'large'))) {
-                $sizes[$_size]['width'] = get_option("{$_size}_size_w");
-                $sizes[$_size]['height'] = get_option("{$_size}_size_h");
-                $sizes[$_size]['crop'] = (bool)get_option("{$_size}_crop");
-            } elseif (isset($_wp_additional_image_sizes[$_size])) {
-                $sizes[$_size] = array(
-                    'width' => $_wp_additional_image_sizes[$_size]['width'],
-                    'height' => $_wp_additional_image_sizes[$_size]['height'],
-                    'crop' => $_wp_additional_image_sizes[$_size]['crop'],
-                );
+        foreach (get_intermediate_image_sizes() as $size) {
+            if (in_array($size, ['thumbnail', 'medium', 'medium_large', 'large'])) {
+                $sizes[$size]['width'] = get_option("{$size}_size_w");
+                $sizes[$size]['height'] = get_option("{$size}_size_h");
+                $sizes[$size]['crop'] = (bool)get_option("{$size}_crop");
+            } elseif (isset($_wp_additional_image_sizes[$size])) {
+                $sizes[$size] = [
+                    'width' => $_wp_additional_image_sizes[$size]['width'],
+                    'height' => $_wp_additional_image_sizes[$size]['height'],
+                    'crop' => $_wp_additional_image_sizes[$size]['crop'],
+                ];
             }
         }
 
         return $sizes;
     }
-
-/*    private function get_image_size($size)
-    {
-        $sizes = $this->getExistedThumbnailsInfo();
-
-        if (isset($sizes[$size])) {
-            return $sizes[$size];
-        }
-
-        return false;
-    }
-
-    private function get_image_width($size)
-    {
-        if (!$size = $this->get_image_size($size)) {
-            return false;
-        }
-
-        if (isset($size['width'])) {
-            return $size['width'];
-        }
-
-        return false;
-    }
-
-    private function get_image_height($size)
-    {
-        if (!$size = $this->get_image_size($size)) {
-            return false;
-        }
-
-        if (isset($size['height'])) {
-            return $size['height'];
-        }
-
-        return false;
-    }*/
 }
