@@ -10,6 +10,26 @@ class AnalyzeThumbnails extends Service
     {
 /*        add_action('admin_menu', [$this, 'addAdminPage']);*/
         add_action('admin_init', [$this, 'adminPageInit']);
+        $this->enqueueScriptsAndStyles();
+        $this->setAjaxDisableHandler();
+    }
+
+    private function enqueueScriptsAndStyles()
+    {
+        add_action('admin_enqueue_scripts', function () {
+            wp_enqueue_script($this->prefix . 'disable-ajax-handler', plugin_dir_url(__DIR__) . 'assets/js/disable-ajax-handler.js', ['jquery'], null, true);
+            wp_localize_script($this->prefix . 'disable-ajax-handler', 'disable_ajax_handler',
+                [
+                    'ajaxurl' => admin_url('admin-ajax.php'),
+                    'prefix' => $this->prefix
+                ]
+            );
+        });
+    }
+
+    private function setAjaxDisableHandler()
+    {
+        add_action('wp_ajax_' . $this->prefix . 'disable_thumbnail', [$this, 'disableThumbnail']);
     }
 
     public function adminPageInit()
@@ -36,6 +56,19 @@ class AnalyzeThumbnails extends Service
                 );*/
     }
 
+    public function disableThumbnail()
+    {
+        $result = 'disable_result';
+
+        if (DOING_AJAX) {
+            wp_send_json([
+                'result' => $result
+            ]);
+
+            wp_die();
+        }
+    }
+
     public function printSectionInfo()
     {
         $table = '<table>';
@@ -56,7 +89,7 @@ class AnalyzeThumbnails extends Service
             $table .= "
                 <td>
                     <button class='button button-primary' data-thumbnail-name='" . $thumbnailName . "'>Analyze</button>
-                    <button class='button button-primary' data-thumbnail-name='" . $thumbnailName . "'>Disable</button>
+                    <button class='button button-primary disable-js' data-thumbnail-name='" . $thumbnailName . "'>Disable</button>
                     <button class='button button-primary' data-thumbnail-name='" . $thumbnailName . "'>Regenerate</button>
                     <button class='button button-primary' data-thumbnail-name='" . $thumbnailName . "'>Remove redundant</button>
                 </td>
