@@ -43,14 +43,17 @@ final class ThumbnailMaster
 {
     const PLUGIN_PREFIX = 'th_m_';
     const ADMIN_PAGE = 'setting-admin';
+    const DB_OPTION_ENABLED_IMAGE_SIZES = self::PLUGIN_PREFIX . 'enabled_image_sizes';
 
     private static $instance;
     private array $services = [];
+    private $enabledImageSizes = [];
 
     public function __construct()
     {
         $this->createServiceContainer();
         $this->registerServices();
+        $this->setEnabledImageSizes();
     }
 
     public static function getInstance(): self
@@ -60,6 +63,40 @@ final class ThumbnailMaster
         }
 
         return self::$instance;
+    }
+
+    public function setEnabledImageSizes()
+    {
+        if ($dbEnabledImageSizes = get_option(self::DB_OPTION_ENABLED_IMAGE_SIZES)) {
+            $this->enabledImageSizes = $dbEnabledImageSizes;
+        } else {
+            if (!empty(get_intermediate_image_sizes())) {
+                $this->enabledImageSizes = get_intermediate_image_sizes();
+            }
+
+            global $_wp_additional_image_sizes;
+            if (!empty($_wp_additional_image_sizes)) {
+                $this->enabledImageSizes = array_merge($this->enabledImageSizes, $_wp_additional_image_sizes);
+            }
+        }
+    }
+
+    public function getEnabledImageSizes() {
+        return $this->enabledImageSizes;
+    }
+
+    public function toggleThumbnailActivation($thumbnailName)
+    {
+        if (in_array($thumbnailName, $this->enabledImageSizes)) {
+            $this->enabledImageSizes = array_diff($this->enabledImageSizes, [$thumbnailName]);
+        } else {
+            $this->enabledImageSizes[] = $thumbnailName;
+        }
+
+        update_option(self::DB_OPTION_ENABLED_IMAGE_SIZES, $this->enabledImageSizes, false);
+        $dbEnabledImageSizes = get_option(self::DB_OPTION_ENABLED_IMAGE_SIZES);
+
+        return in_array($thumbnailName, $dbEnabledImageSizes) ? 'enabled' : 'disabled';
     }
 
     private function activate()

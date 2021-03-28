@@ -1,8 +1,9 @@
 jQuery(document).ready(function() {
-    jQuery('.disable-js').click(function (event) {
+    jQuery('.th_m_disable-button-js').click(function (event) {
         event.preventDefault();
 
-        let thumbnailName = jQuery(this).attr('data-thumbnail-name');
+        const thumbnailName = jQuery(this).attr('data-thumbnail-name');
+        const disableButton = jQuery('.' + remove_redundant_ajax_handler.prefix + 'disable-button-' + thumbnailName + '-js');
 
         jQuery.ajax({
             url: disable_ajax_handler.ajaxurl,
@@ -13,7 +14,13 @@ jQuery(document).ready(function() {
 
             },
             success: function(data) {
-
+                if (data['status']) {
+                    if (data['status'] === 'enabled') {
+                        disableButton.text('Disable');
+                    } else {
+                        disableButton.text('Enable');
+                    }
+                }
             }
         });
     });

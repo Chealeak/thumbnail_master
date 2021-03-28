@@ -6,9 +6,9 @@ jQuery(document).ready(function() {
 });
 
 function sendAjaxQuery() {
-    let removeButton = jQuery('.' + remove_redundant_ajax_handler.prefix + 'remove-redundant-button-js');
-    let resultElement = jQuery('.' + remove_redundant_ajax_handler.prefix + 'remove-redundant-result-js');
-    let page = resultElement.attr('data-page');
+    const removeButton = jQuery('.' + remove_redundant_ajax_handler.prefix + 'remove-redundant-button-js');
+    const resultElement = jQuery('.' + remove_redundant_ajax_handler.prefix + 'remove-redundant-result-js');
+    const page = resultElement.attr('data-page');
 
     jQuery.ajax({
         url: remove_redundant_ajax_handler.ajaxurl,
