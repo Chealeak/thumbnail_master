@@ -6,8 +6,11 @@ use ThumbnailMaster\Service;
 
 class RemoveRedundantThumbnails extends Service
 {
-    public function register()
+    public function register(string $prefix, string $adminPage)
     {
+        $this->prefix = $prefix;
+        $this->adminPage = $adminPage;
+
         add_action('admin_init', [$this, 'adminPageInit']);
         $this->enqueueScriptsAndStyles();
         $this->setAjaxRemoveRedundantHandler();

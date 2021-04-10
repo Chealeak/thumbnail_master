@@ -6,10 +6,19 @@ use ThumbnailMaster\Service;
 
 class RegenerateThumbnails extends Service
 {
-    public function register()
+    public function __construct(AnalyzeThumbnails $analyzeThumbnails)
     {
+
+    }
+
+    public function register(string $prefix, string $adminPage)
+    {
+        $this->prefix = $prefix;
+        $this->adminPage = $adminPage;
+
         add_action('admin_menu', [$this, 'addAdminPage']);
         add_action('admin_init', [$this, 'adminPageInit']);
+
 
         //$this->regenerate();
     }

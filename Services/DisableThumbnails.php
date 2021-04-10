@@ -4,7 +4,7 @@ namespace ThumbnailMaster\Services;
 
 use ThumbnailMaster\Service;
 
-class AnalyzeThumbnails extends Service
+class DisableThumbnails extends Service
 {
     public function register(string $prefix, string $adminPage)
     {
@@ -12,9 +12,9 @@ class AnalyzeThumbnails extends Service
         $this->adminPage = $adminPage;
 
 /*        add_action('admin_menu', [$this, 'addAdminPage']);*/
-        add_action('admin_init', [$this, 'adminPageInit']);
-        $this->enqueueScriptsAndStyles();
-        $this->setAjaxDisableHandler();
+        //add_action('admin_init', [$this, 'adminPageInit']);
+        //$this->enqueueScriptsAndStyles();
+        //$this->setAjaxDisableHandler();
     }
 
     private function enqueueScriptsAndStyles()
@@ -62,16 +62,14 @@ class AnalyzeThumbnails extends Service
     public function disableThumbnail()
     {
         $thumbnailMaster = \ThumbnailMaster::getInstance();
+        $thumbnailMaster->toggleThumbnailActivation('demo-thumb2');
 
-        if (isset($_POST['thumbnail_name'])) {
+        if (DOING_AJAX) {
+            wp_send_json([
+                //'result' => $result
+            ]);
 
-            if (DOING_AJAX) {
-                wp_send_json([
-                    'status' => $thumbnailMaster->toggleThumbnailActivation(filter_var($_POST['thumbnail_name'], FILTER_SANITIZE_STRING))
-                ]);
-
-                wp_die();
-            }
+            wp_die();
         }
     }
 
@@ -92,12 +90,10 @@ class AnalyzeThumbnails extends Service
             $table .= "<td>{$thumbnailName}</td>";
             $table .= "<td>{$thumbnailInfo['width']}x{$thumbnailInfo['height']}</td>";
             $table .= "<td>" . ($thumbnailInfo['crop'] ? 'Yes' : 'No') . "</td>";
-            $disableButtonTitle = ($thumbnailInfo['enabled'] ? 'Disable' : 'Enable');
-            $disableButtonExtraClass = ($thumbnailInfo['enabled'] ? $this->prefix . 'enabled' : $this->prefix . 'disabled');
             $table .= "
                 <td>
                     <button class='button button-primary' data-thumbnail-name='" . $thumbnailName . "'>Analyze</button>
-                    <button class='button button-primary {$this->prefix}disable-button-js {$this->prefix}disable-button-{$thumbnailName}-js {$disableButtonExtraClass}' data-thumbnail-name='" . $thumbnailName . "'>{$disableButtonTitle}</button>
+                    <button class='button button-primary disable-js' data-thumbnail-name='" . $thumbnailName . "'>Disable</button>
                     <button class='button button-primary' data-thumbnail-name='" . $thumbnailName . "'>Regenerate</button>
                     <button class='button button-primary' data-thumbnail-name='" . $thumbnailName . "'>Remove redundant</button>
                 </td>
@@ -136,22 +132,16 @@ class AnalyzeThumbnails extends Service
 
         $sizes = [];
 
-        $thumbnailMaster = \ThumbnailMaster::getInstance();
-
         foreach (get_intermediate_image_sizes() as $size) {
-            $thumbnailEnabled = in_array($size, $thumbnailMaster->getEnabledImageSizes());
-
             if (in_array($size, ['thumbnail', 'medium', 'medium_large', 'large'])) {
                 $sizes[$size]['width'] = get_option("{$size}_size_w");
                 $sizes[$size]['height'] = get_option("{$size}_size_h");
                 $sizes[$size]['crop'] = (bool)get_option("{$size}_crop");
-                $sizes[$size]['enabled'] = $thumbnailEnabled;
             } elseif (isset($_wp_additional_image_sizes[$size])) {
                 $sizes[$size] = [
                     'width' => $_wp_additional_image_sizes[$size]['width'],
                     'height' => $_wp_additional_image_sizes[$size]['height'],
                     'crop' => $_wp_additional_image_sizes[$size]['crop'],
-                    'enabled' => $thumbnailEnabled
                 ];
             }
         }

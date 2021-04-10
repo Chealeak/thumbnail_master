@@ -46,12 +46,17 @@ final class ThumbnailMaster
     const DB_OPTION_ENABLED_IMAGE_SIZES = self::PLUGIN_PREFIX . 'enabled_image_sizes';
 
     private static $instance;
-    private array $services = [];
+    private $container;
     private $enabledImageSizes = [];
 
     public function __construct()
     {
-        $this->createServiceContainer();
+        if (!class_exists('DI\Container')) {
+            // exception
+        }
+
+        $this->container = new DI\Container();
+
         $this->registerServices();
         $this->setEnabledImageSizes();
     }
@@ -81,7 +86,8 @@ final class ThumbnailMaster
         }
     }
 
-    public function getEnabledImageSizes() {
+    public function getEnabledImageSizes()
+    {
         return $this->enabledImageSizes;
     }
 
@@ -114,7 +120,7 @@ final class ThumbnailMaster
         // uninstall plugin logic
     }
 
-    private function createServiceContainer()
+    private function registerServices()
     {
         $serviceNamespace = "ThumbnailMaster\\Services\\";
 
@@ -124,16 +130,9 @@ final class ThumbnailMaster
             $serviceNameWithNamespace = $serviceNamespace . $serviceClassName;
 
             if (class_exists($serviceNameWithNamespace)) {
-                $service = new $serviceNameWithNamespace(self::PLUGIN_PREFIX, self::ADMIN_PAGE);
-                $this->services[] = $service;
+                $service = $this->container->get($serviceNameWithNamespace);
+                $service->register(self::PLUGIN_PREFIX, self::ADMIN_PAGE);
             }
-        }
-    }
-
-    private function registerServices()
-    {
-        foreach ($this->services as $service) {
-            $service->register();
         }
     }
 }
