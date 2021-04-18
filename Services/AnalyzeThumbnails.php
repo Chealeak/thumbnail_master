@@ -23,26 +23,12 @@ class AnalyzeThumbnails extends Service
 
     public function adminPageInit()
     {
-        /*        register_setting(
-                    $this->prefix . 'option_group',
-                    'option_name',
-                    [$this, 'sanitizeOptionField']
-                );*/
-
         add_settings_section(
             $this->prefix . 'setting_section_analysis',
             'Analysis',
             [$this, 'printSectionInfo'],
-            $this->prefix . $this->adminPage
+            $this->adminPage
         );
-
-        /*        add_settings_field(
-                    'title',
-                    'Title',
-                    [$this, 'title_callback'],
-                    'my-setting-admin',
-                    'setting_section_id'
-                );*/
     }
 
     public function printSectionInfo()
@@ -80,8 +66,10 @@ class AnalyzeThumbnails extends Service
         $allImages = '<h2>All images</h2>';
         $allImages .= "
             <td>
-                <button class='button button-primary'>Regenerate</button>
-                <button class='button button-primary'>Remove redundant</button>
+                <button class='button button-primary {$this->prefix}regenerate-button-js'>Regenerate</button>
+                <div id='{$this->prefix}progressbar' class='ldBar'></div>
+                <button class='button button-primary {$this->prefix}remove-redundant-button-js'>Remove redundant</button>
+                <div class='{$this->prefix}remove-redundant-result-js' data-page='1'></div>
                 <button class='button button-primary'>Backup uploads</button>
             </td>
         ";

@@ -11,30 +11,8 @@ class RemoveRedundantThumbnails extends Service
         $this->prefix = $prefix;
         $this->adminPage = $adminPage;
 
-        add_action('admin_init', [$this, 'adminPageInit']);
         $this->enqueueScriptsAndStyles();
         $this->setAjaxRemoveRedundantHandler();
-    }
-
-    public function adminPageInit()
-    {
-        add_settings_section(
-            $this->prefix . 'setting_section_remove_redundant_thumbnails',
-            'Remove Redundant Thumbnails',
-            [$this, 'printSectionInfo'],
-            $this->prefix . $this->adminPage
-        );
-    }
-
-    public function printSectionInfo()
-    {
-        ?>
-            <div class="wrap">
-                <h1>Remove Redundant Thumbnails</h1>
-                <button class="<?= $this->prefix ?>remove-redundant-button-js">Remove</button>
-                <div class="<?= $this->prefix ?>remove-redundant-result-js" data-page="1"></div>
-            </div>
-        <?php
     }
 
     private function enqueueScriptsAndStyles()

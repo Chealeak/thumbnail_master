@@ -42,7 +42,7 @@ if (file_exists(dirname(__FILE__) . '/vendor/autoload.php')) {
 final class ThumbnailMaster
 {
     const PLUGIN_PREFIX = 'th_m_';
-    const ADMIN_PAGE = 'setting-admin';
+    const ADMIN_PAGE = self::PLUGIN_PREFIX . 'regenerate_thumbnails';
 
     private static $instance;
     private $container;
@@ -52,6 +52,8 @@ final class ThumbnailMaster
         if (!class_exists('DI\Container')) {
             // exception
         }
+        add_action('admin_menu', [$this, 'addAdminPage']);
+        add_action('admin_init', [$this, 'adminPageInit']);
 
         $this->container = new DI\Container();
 
@@ -80,6 +82,22 @@ final class ThumbnailMaster
     private function uninstall()
     {
         // uninstall plugin logic
+    }
+
+    public function addAdminPage()
+    {
+        add_menu_page(
+            'Thumbnail Master',
+            'Thumbnail Master',
+            'manage_options',
+            self::ADMIN_PAGE,
+            [$this, 'renderAdminPage']
+        );
+    }
+
+    public function renderAdminPage()
+    {
+        do_settings_sections(self::ADMIN_PAGE);
     }
 
     private function registerServices()

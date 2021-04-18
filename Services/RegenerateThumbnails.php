@@ -11,52 +11,8 @@ class RegenerateThumbnails extends Service
         $this->prefix = $prefix;
         $this->adminPage = $adminPage;
 
-        add_action('admin_menu', [$this, 'addAdminPage']);
-        add_action('admin_init', [$this, 'adminPageInit']);
-    }
-
-    public function addAdminPage()
-    {
-        add_menu_page('Thumbnail Master',
-            'Thumbnail Master',
-            'manage_options',
-            $this->prefix . 'regenerate_thumbnails',
-            function () {}
-        );
-        add_submenu_page($this->prefix . 'regenerate_thumbnails',
-            'Regenerate Thumbnails',
-            'Regenerate Thumbnails',
-            'manage_options',
-            $this->prefix . 'regenerate_thumbnails',
-            function () {}
-        );
-
-        add_options_page(
-            'Settings Admin',
-            'My Settings',
-            'manage_options',
-            $this->prefix . 'regenerate_thumbnails',
-            [$this, 'renderAdminPage']
-        );
-    }
-
-    public function renderAdminPage()
-    {
-        $this->options = get_option('my_option_name');
-        ?>
-        <div class="wrap">
-            <h1>Regenerate Thumbnails Settings</h1>
-            <form method="post" action="options.php">
-                <?php
-                settings_fields($this->prefix . 'option_group');
-                do_settings_sections($this->prefix . 'setting-admin');
-                submit_button();
-                ?>
-            </form>
-            <button class="<?= $this->prefix ?>regenerate-button-js">Regenerate</button>
-            <div id="<?= $this->prefix ?>progressbar" class="ldBar"></div>
-        </div>
-        <?php
+        $this->enqueueScriptsAndStyles();
+        $this->setAjaxRegenerationHandler();
     }
 
     public function sanitizeOptionField($input)
@@ -69,14 +25,6 @@ class RegenerateThumbnails extends Service
 
         return $newInput;
     }
-
-    /*    public function title_callback()
-        {
-            printf(
-                '<input type="text" id="title" name="my_option_name[title]" value="%s"/>',
-                isset($this->options['title']) ? esc_attr($this->options['title']) : ''
-            );
-        }*/
 
     private function enqueueScriptsAndStyles()
     {
