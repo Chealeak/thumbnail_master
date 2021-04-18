@@ -6,11 +6,6 @@ use ThumbnailMaster\Service;
 
 class RegenerateThumbnails extends Service
 {
-    public function __construct(AnalyzeThumbnails $analyzeThumbnails)
-    {
-
-    }
-
     public function register(string $prefix, string $adminPage)
     {
         $this->prefix = $prefix;
@@ -18,9 +13,6 @@ class RegenerateThumbnails extends Service
 
         add_action('admin_menu', [$this, 'addAdminPage']);
         add_action('admin_init', [$this, 'adminPageInit']);
-
-
-        //$this->regenerate();
     }
 
     public function addAdminPage()
@@ -65,30 +57,6 @@ class RegenerateThumbnails extends Service
             <div id="<?= $this->prefix ?>progressbar" class="ldBar"></div>
         </div>
         <?php
-    }
-
-    public function adminPageInit()
-    {
-        /*        register_setting(
-                    $this->prefix . 'option_group',
-                    'option_name',
-                    [$this, 'sanitizeOptionField']
-                );*/
-
-/*        add_settings_section(
-            $this->prefix . 'setting_section_analysis',
-            'Analysis',
-            [$this, 'printAnalysisSectionInfo'],
-            $this->prefix . 'setting-admin'
-        );*/
-
-        /*        add_settings_field(
-                    'title',
-                    'Title',
-                    [$this, 'title_callback'],
-                    'my-setting-admin',
-                    'setting_section_id'
-                );*/
     }
 
     public function sanitizeOptionField($input)

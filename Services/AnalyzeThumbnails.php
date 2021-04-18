@@ -6,33 +6,19 @@ use ThumbnailMaster\Service;
 
 class AnalyzeThumbnails extends Service
 {
+    private $disableThumbnails;
+
+    public function __construct(DisableThumbnails $disableThumbnails)
+    {
+        $this->disableThumbnails = $disableThumbnails;
+    }
+
     public function register(string $prefix, string $adminPage)
     {
         $this->prefix = $prefix;
         $this->adminPage = $adminPage;
 
-/*        add_action('admin_menu', [$this, 'addAdminPage']);*/
         add_action('admin_init', [$this, 'adminPageInit']);
-        $this->enqueueScriptsAndStyles();
-        $this->setAjaxDisableHandler();
-    }
-
-    private function enqueueScriptsAndStyles()
-    {
-        add_action('admin_enqueue_scripts', function () {
-            wp_enqueue_script($this->prefix . 'disable-ajax-handler', plugin_dir_url(__DIR__) . 'assets/js/disable-ajax-handler.js', ['jquery'], null, true);
-            wp_localize_script($this->prefix . 'disable-ajax-handler', 'disable_ajax_handler',
-                [
-                    'ajaxurl' => admin_url('admin-ajax.php'),
-                    'prefix' => $this->prefix
-                ]
-            );
-        });
-    }
-
-    private function setAjaxDisableHandler()
-    {
-        add_action('wp_ajax_' . $this->prefix . 'disable_thumbnail', [$this, 'disableThumbnail']);
     }
 
     public function adminPageInit()
@@ -57,22 +43,6 @@ class AnalyzeThumbnails extends Service
                     'my-setting-admin',
                     'setting_section_id'
                 );*/
-    }
-
-    public function disableThumbnail()
-    {
-        $thumbnailMaster = \ThumbnailMaster::getInstance();
-
-        if (isset($_POST['thumbnail_name'])) {
-
-            if (DOING_AJAX) {
-                wp_send_json([
-                    'status' => $thumbnailMaster->toggleThumbnailActivation(filter_var($_POST['thumbnail_name'], FILTER_SANITIZE_STRING))
-                ]);
-
-                wp_die();
-            }
-        }
     }
 
     public function printSectionInfo()
@@ -135,11 +105,10 @@ class AnalyzeThumbnails extends Service
         global $_wp_additional_image_sizes;
 
         $sizes = [];
-
-        $thumbnailMaster = \ThumbnailMaster::getInstance();
+        $enabledThumbnailSizes = $this->disableThumbnails->getEnabledImageSizes();
 
         foreach (get_intermediate_image_sizes() as $size) {
-            $thumbnailEnabled = in_array($size, $thumbnailMaster->getEnabledImageSizes());
+            $thumbnailEnabled = in_array($size, $enabledThumbnailSizes);
 
             if (in_array($size, ['thumbnail', 'medium', 'medium_large', 'large'])) {
                 $sizes[$size]['width'] = get_option("{$size}_size_w");
