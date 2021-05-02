@@ -6,6 +6,13 @@ use ThumbnailMaster\Service;
 
 class RegenerateThumbnails extends Service
 {
+    private $enabledImageSizes;
+
+    public function __construct(DisableThumbnails $disableThumbnails)
+    {
+        $this->enabledImageSizes = $disableThumbnails->getEnabledImageSizes();
+    }
+
     public function register(string $prefix, string $adminPage)
     {
         $this->prefix = $prefix;
@@ -61,17 +68,62 @@ class RegenerateThumbnails extends Service
 
         global $wpdb;
         $imagesExisted = $wpdb->get_results("SELECT ID FROM $wpdb->posts WHERE post_type='attachment' AND post_mime_type LIKE 'image/%'");
+        $getExistedThumbnailsInfo = $this->getExistedThumbnailsInfo();
+
+        foreach ($getExistedThumbnailsInfo as $imageInfoName => $imageInfo) {
+            if (!$imageInfo['enabled']) {
+                remove_image_size($imageInfoName);
+            }
+        }
 
         foreach ($imagesExisted as $image) {
             $imageFullSizePath = get_attached_file($image->ID);
 
             if (file_exists($imageFullSizePath)) {
-                if (wp_update_attachment_metadata($image->ID, wp_generate_attachment_metadata($image->ID, $imageFullSizePath))) {
+                $attachmentMetadata = wp_generate_attachment_metadata($image->ID, $imageFullSizePath);
+
+                if (!empty($this->enabledImageSizes) && isset($attachmentMetadata['sizes'])) {
+                    foreach ($attachmentMetadata['sizes'] as $sizeKey => $sizeValue) {
+                        if (!in_array($sizeKey, $this->enabledImageSizes)) {
+                            unset($attachmentMetadata['sizes'][$sizeKey]);
+                        }
+                    }
+                }
+
+                if (wp_update_attachment_metadata($image->ID, $attachmentMetadata)) {
 
                 } else {
 
                 }
             }
         }
+    }
+
+    private function getExistedThumbnailsInfo()
+    {
+        global $_wp_additional_image_sizes;
+
+        $sizes = [];
+        $enabledThumbnailSizes = $this->enabledImageSizes;
+
+        foreach (get_intermediate_image_sizes() as $size) {
+            $thumbnailEnabled = in_array($size, $enabledThumbnailSizes);
+
+            if (in_array($size, ['thumbnail', 'medium', 'medium_large', 'large'])) {
+                $sizes[$size]['width'] = get_option("{$size}_size_w");
+                $sizes[$size]['height'] = get_option("{$size}_size_h");
+                $sizes[$size]['crop'] = (bool)get_option("{$size}_crop");
+                $sizes[$size]['enabled'] = $thumbnailEnabled;
+            } elseif (isset($_wp_additional_image_sizes[$size])) {
+                $sizes[$size] = [
+                    'width' => $_wp_additional_image_sizes[$size]['width'],
+                    'height' => $_wp_additional_image_sizes[$size]['height'],
+                    'crop' => $_wp_additional_image_sizes[$size]['crop'],
+                    'enabled' => $thumbnailEnabled
+                ];
+            }
+        }
+
+        return $sizes;
     }
 }
