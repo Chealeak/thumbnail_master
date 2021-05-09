@@ -54,7 +54,7 @@ class AnalyzeThumbnails extends Service
                 <td>
                     <button class='button button-primary' data-thumbnail-name='" . $thumbnailName . "'>Analyze</button>
                     <button class='button button-primary {$this->prefix}disable-button-js {$this->prefix}disable-button-{$thumbnailName}-js {$disableButtonExtraClass}' data-thumbnail-name='" . $thumbnailName . "'>{$disableButtonTitle}</button>
-                    <button class='button button-primary' data-thumbnail-name='" . $thumbnailName . "'>Regenerate</button>
+                    <button class='button button-primary {$this->prefix}regenerate-single-button-js' data-thumbnail-name='" . $thumbnailName . "'>Regenerate</button>
                     <button class='button button-primary' data-thumbnail-name='" . $thumbnailName . "'>Remove redundant</button>
                 </td>
             ";
