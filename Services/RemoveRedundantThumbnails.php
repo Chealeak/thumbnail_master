@@ -6,6 +6,13 @@ use ThumbnailMaster\Service;
 
 class RemoveRedundantThumbnails extends Service
 {
+    private $enabledImageSizes;
+
+    public function __construct(DisableThumbnails $disableThumbnails)
+    {
+        $this->enabledImageSizes = $disableThumbnails->getEnabledImageSizes();
+    }
+
     public function register(string $prefix, string $adminPage)
     {
         $this->prefix = $prefix;
@@ -49,21 +56,16 @@ class RemoveRedundantThumbnails extends Service
 
         $attachmentQuery = new \WP_Query($attachmentArgs);
 
-        $existedImageSizeNames = [];
-        global $_wp_additional_image_sizes;
-
-        if (!empty($_wp_additional_image_sizes)) {
-            $existedImageSizeNames = array_keys($_wp_additional_image_sizes);
-        }
-
         foreach ($attachmentQuery->posts as $attachmentId) {
             $attachmentMeta = wp_get_attachment_metadata($attachmentId);
             $uploadDirectory = wp_upload_dir();
             $pathToFileDirectory = str_replace(basename($attachmentMeta['file']), '', trailingslashit($uploadDirectory['basedir']) . $attachmentMeta['file']);
             foreach ($attachmentMeta['sizes'] as $size => $info) {
-                if (!in_array($size, $existedImageSizeNames)) {
+                if (!in_array($size, $this->enabledImageSizes)) {
                     $filePath = realpath($pathToFileDirectory . $info['file']);
-                    unlink($filePath);
+                    if ($filePath) {
+                        unlink($filePath);
+                    }
                     unset($attachmentMeta['sizes'][$size]);
                 }
             }
