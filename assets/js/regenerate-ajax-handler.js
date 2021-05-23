@@ -19,7 +19,7 @@ function regenerate(event) {
             jQuery('.th_m_regenerate-button-js').text('Generating...');
         },
         success: function(data) {
-            jQuery('.th_m_regenerate-button-js').text('Generate');
+            jQuery('.th_m_regenerate-button-js').text('Regenerate');
         },
         xhr: function() {
             var xhr = new XMLHttpRequest();

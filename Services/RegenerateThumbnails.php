@@ -73,25 +73,24 @@ class RegenerateThumbnails extends Service
 
         global $wpdb;
         $imagesExisted = $wpdb->get_results("SELECT ID FROM $wpdb->posts WHERE post_type='attachment' AND post_mime_type LIKE 'image/%'");
-        $getExistedThumbnailsInfo = $this->getExistedThumbnailsInfo();
+        $existedThumbnailsInfo = $this->getExistedThumbnailsInfo();
 
         $defaultImageSizesToRemove = [];
 
-        foreach ($getExistedThumbnailsInfo as $imageInfoName => $imageInfo) {
+        foreach ($existedThumbnailsInfo as $imageInfoName => $imageInfo) {
             $isDefaultImageSize = in_array($imageInfoName, ['thumbnail', 'medium', 'medium_large', 'large']);
-            $isDefaultImageSizeToRegenerate = ($imageInfoName === $thumbnailName);
-            if ($isDefaultImageSize && !$isDefaultImageSizeToRegenerate) {
+            if ($isDefaultImageSize && !$imageInfo['enabled']) {
                 $defaultImageSizesToRemove[] = $imageInfoName;
             }
         }
 
         if (!is_null($thumbnailName) ) {
-            foreach ($getExistedThumbnailsInfo as $imageInfoName => $imageInfo)
+            foreach ($existedThumbnailsInfo as $imageInfoName => $imageInfo)
                 if ($thumbnailName !== $imageInfoName) {
                     remove_image_size($imageInfoName);
                 }
         } else {
-            foreach ($getExistedThumbnailsInfo as $imageInfoName => $imageInfo) {
+            foreach ($existedThumbnailsInfo as $imageInfoName => $imageInfo) {
                 if (!$imageInfo['enabled']) {
                     remove_image_size($imageInfoName);
                 }
@@ -129,12 +128,12 @@ class RegenerateThumbnails extends Service
         }
 
         if (!is_null($thumbnailName) ) {
-            foreach ($getExistedThumbnailsInfo as $imageInfoName => $imageInfo)
+            foreach ($existedThumbnailsInfo as $imageInfoName => $imageInfo)
                 if ($thumbnailName !== $imageInfoName) {
                     add_image_size($imageInfoName, $imageInfo['width'], $imageInfo['height'], $imageInfo['crop']);
                 }
         } else {
-            foreach ($getExistedThumbnailsInfo as $imageInfoName => $imageInfo) {
+            foreach ($existedThumbnailsInfo as $imageInfoName => $imageInfo) {
                 if (!$imageInfo['enabled']) {
                     add_image_size($imageInfoName, $imageInfo['width'], $imageInfo['height'], $imageInfo['crop']);
                 }
