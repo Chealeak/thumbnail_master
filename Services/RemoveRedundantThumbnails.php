@@ -40,7 +40,7 @@ class RemoveRedundantThumbnails extends Service
         add_action('wp_ajax_' . $this->prefix . 'remove_redundant_thumbnails', [$this, 'removeThumbnails']);
     }
 
-    public function removeThumbnails()
+    public function removeThumbnails($thumbnailNameToRemove = null)
     {
         $attachmentArgs = [
             'post_type'      => 'attachment',
@@ -54,19 +54,27 @@ class RemoveRedundantThumbnails extends Service
             $attachmentArgs['posts_per_page'] = 10;
         }
 
-        $attachmentQuery = new \WP_Query($attachmentArgs);
+        if (isset($_POST['thumbnailName'])) {
+            $thumbnailNameToRemove = filter_var($_POST['thumbnailName'], FILTER_SANITIZE_STRING);
+        }
 
+        $attachmentQuery = new \WP_Query($attachmentArgs);
         foreach ($attachmentQuery->posts as $attachmentId) {
             $attachmentMeta = wp_get_attachment_metadata($attachmentId);
             $uploadDirectory = wp_upload_dir();
             $pathToFileDirectory = str_replace(basename($attachmentMeta['file']), '', trailingslashit($uploadDirectory['basedir']) . $attachmentMeta['file']);
-            foreach ($attachmentMeta['sizes'] as $size => $info) {
-                if (!in_array($size, $this->enabledImageSizes)) {
-                    $filePath = realpath($pathToFileDirectory . $info['file']);
-                    if ($filePath) {
-                        unlink($filePath);
+            foreach ($attachmentMeta['sizes'] as $existedThumbnailName => $existedThumbnailInfo) {
+                if (!in_array($existedThumbnailName, $this->enabledImageSizes)) {
+                    $isSpecifiedThumbnailRemoving = (!empty($thumbnailNameToRemove) && ($thumbnailNameToRemove === $existedThumbnailName));
+                    $isDisabledThumbnailsRemoving = (empty($thumbnailNameToRemove));
+
+                    if ($isSpecifiedThumbnailRemoving || $isDisabledThumbnailsRemoving) {
+                        $filePath = realpath($pathToFileDirectory . $existedThumbnailInfo['file']);
+                        if ($filePath) {
+                            unlink($filePath);
+                        }
+                        unset($attachmentMeta['sizes'][$existedThumbnailName]);
                     }
-                    unset($attachmentMeta['sizes'][$size]);
                 }
             }
 
