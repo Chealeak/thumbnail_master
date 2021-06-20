@@ -6,18 +6,18 @@ use ThumbnailMaster\Service;
 
 class DisableThumbnails extends Service
 {
-    private $dbOptionEnabledImageSizes;
-    private $enabledImageSizes = [];
+    private $dbOptionExistedImageSizes;
+    private $existedThumbnailsInfo = [];
 
     public function register(string $prefix, string $adminPage)
     {
         $this->prefix = $prefix;
         $this->adminPage = $adminPage;
-        $this->dbOptionEnabledImageSizes = $prefix . 'enabled_image_sizes';
+        $this->dbOptionExistedImageSizes = $prefix . 'existed_image_sizes';
 
         $this->enqueueScriptsAndStyles();
         $this->setAjaxDisableHandler();
-        $this->setEnabledImageSizes();
+        $this->keepEnabledImageSizes();
     }
 
     private function enqueueScriptsAndStyles()
@@ -38,25 +38,50 @@ class DisableThumbnails extends Service
         add_action('wp_ajax_' . $this->prefix . 'disable_thumbnail', [$this, 'disableThumbnail']);
     }
 
-    private function setEnabledImageSizes()
+    private function keepEnabledImageSizes()
     {
-        if ($dbEnabledImageSizes = get_option($this->dbOptionEnabledImageSizes)) {
-            $this->enabledImageSizes = $dbEnabledImageSizes;
-        } else {
-            if (!empty(get_intermediate_image_sizes())) {
-                $this->enabledImageSizes = get_intermediate_image_sizes();
-            }
-
-            global $_wp_additional_image_sizes;
-            if (!empty($_wp_additional_image_sizes)) {
-                $this->enabledImageSizes = array_merge($this->enabledImageSizes, $_wp_additional_image_sizes);
-            }
-        }
+        add_action('init', function () {
+            $this->existedThumbnailsInfo = $this->getExistedThumbnailsInfo();
+        });
     }
 
-    public function getEnabledImageSizes()
+    private function getExistedThumbnailsInfo()
     {
-        return $this->enabledImageSizes;
+        global $_wp_additional_image_sizes;
+
+        $sizes = [];
+
+        $existedImageSizesFromDb = get_option($this->dbOptionExistedImageSizes);
+
+        foreach (get_intermediate_image_sizes() as $size) {
+            $enabled = true;
+            if ($existedImageSizesFromDb) {
+                if (isset($existedImageSizesFromDb[$size])) {
+                    $enabled = $existedImageSizesFromDb[$size]['enabled'];
+                }
+            }
+
+            if (in_array($size, ['thumbnail', 'medium', 'medium_large', 'large'])) {
+                $sizes[$size]['width'] = get_option("{$size}_size_w");
+                $sizes[$size]['height'] = get_option("{$size}_size_h");
+                $sizes[$size]['crop'] = (bool)get_option("{$size}_crop");
+                $sizes[$size]['enabled'] = $enabled;
+            } elseif (isset($_wp_additional_image_sizes[$size])) {
+                $sizes[$size] = [
+                    'width' => $_wp_additional_image_sizes[$size]['width'],
+                    'height' => $_wp_additional_image_sizes[$size]['height'],
+                    'crop' => $_wp_additional_image_sizes[$size]['crop'],
+                    'enabled' => $enabled
+                ];
+            }
+        }
+
+        return $sizes;
+    }
+
+    public function getExistedImageSizesInfo()
+    {
+        return $this->existedThumbnailsInfo;
     }
 
     public function disableThumbnail()
@@ -75,14 +100,14 @@ class DisableThumbnails extends Service
 
     public function toggleThumbnailActivation($thumbnailName)
     {
-        if (in_array($thumbnailName, $this->enabledImageSizes)) {
-            $this->enabledImageSizes = array_diff($this->enabledImageSizes, [$thumbnailName]);
+        if (in_array($thumbnailName, $this->existedThumbnailsInfo)) {
+            $this->existedThumbnailsInfo = array_diff($this->existedThumbnailsInfo, [$thumbnailName]);
         } else {
-            $this->enabledImageSizes[] = $thumbnailName;
+            $this->existedThumbnailsInfo[] = $thumbnailName;
         }
 
-        update_option($this->dbOptionEnabledImageSizes, $this->enabledImageSizes, false);
-        $dbEnabledImageSizes = get_option($this->dbOptionEnabledImageSizes);
+        update_option($this->dbOptionExistedImageSizes, $this->existedThumbnailsInfo, false);
+        $dbEnabledImageSizes = get_option($this->dbOptionExistedImageSizes);
 
         return in_array($thumbnailName, $dbEnabledImageSizes) ? 'enabled' : 'disabled';
     }

@@ -92,7 +92,7 @@ class AnalyzeThumbnails extends Service
         global $_wp_additional_image_sizes;
 
         $sizes = [];
-        $enabledThumbnailSizes = $this->disableThumbnails->getEnabledImageSizes();
+        $enabledThumbnailSizes = $this->disableThumbnails->getExistedImageSizesInfo();
 
         foreach (get_intermediate_image_sizes() as $size) {
             $thumbnailEnabled = in_array($size, $enabledThumbnailSizes);

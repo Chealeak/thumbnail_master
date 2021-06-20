@@ -10,7 +10,7 @@ class RemoveRedundantThumbnails extends Service
 
     public function __construct(DisableThumbnails $disableThumbnails)
     {
-        $this->enabledImageSizes = $disableThumbnails->getEnabledImageSizes();
+        $this->enabledImageSizes = $disableThumbnails->getExistedImageSizesInfo();
     }
 
     public function register(string $prefix, string $adminPage)
