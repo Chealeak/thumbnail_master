@@ -3,7 +3,7 @@ jQuery(document).ready(function() {
         event.preventDefault();
 
         const thumbnailName = jQuery(this).attr('data-thumbnail-name');
-        const disableButton = jQuery('.' + remove_redundant_ajax_handler.prefix + 'disable-button-' + thumbnailName + '-js');
+        const disableButton = jQuery('.' + disable_ajax_handler.prefix + 'disable-button-' + thumbnailName + '-js');
 
         jQuery.ajax({
             url: disable_ajax_handler.ajaxurl,
@@ -14,12 +14,10 @@ jQuery(document).ready(function() {
 
             },
             success: function(data) {
-                if (data['status']) {
-                    if (data['status'] === 'enabled') {
-                        disableButton.text('Disable');
-                    } else {
-                        disableButton.text('Enable');
-                    }
+                if (data['enabled']) {
+                    disableButton.text('Disable');
+                } else {
+                    disableButton.text('Enable');
                 }
             }
         });

@@ -6,6 +6,7 @@ use ThumbnailMaster\Service;
 
 class AnalyzeThumbnails extends Service
 {
+    private $dbOptionExistedImageSizes;
     private $existedThumbnailsInfo;
 
     public function __construct(DisableThumbnails $disableThumbnails)
@@ -17,6 +18,9 @@ class AnalyzeThumbnails extends Service
     {
         $this->prefix = $prefix;
         $this->adminPage = $adminPage;
+        $this->dbOptionExistedImageSizes = $prefix . 'existed_image_sizes';
+
+        $this->keepEnabledImageSizes();
 
         add_action('admin_init', [$this, 'adminPageInit']);
     }
@@ -42,8 +46,7 @@ class AnalyzeThumbnails extends Service
         $table .= '<th>Actions</th>';
         $table .= '</tr>';
 
-        $existedThumbnailsInfo = $this->getExistedThumbnailsInfo();
-        foreach ($existedThumbnailsInfo as $thumbnailName => $thumbnailInfo) {
+        foreach ($this->existedThumbnailsInfo as $thumbnailName => $thumbnailInfo) {
             $table .= '<tr>';
             $table .= "<td>{$thumbnailName}</td>";
             $table .= "<td>{$thumbnailInfo['width']}x{$thumbnailInfo['height']}</td>";
@@ -93,11 +96,13 @@ class AnalyzeThumbnails extends Service
 
         $sizes = [];
 
+        $existedImageSizesFromDb = get_option($this->dbOptionExistedImageSizes);
+
         foreach (get_intermediate_image_sizes() as $size) {
             $enabled = true;
-            if ($this->existedThumbnailsInfo) {
-                if (isset($this->existedThumbnailsInfo[$size])) {
-                    $enabled = $this->existedThumbnailsInfo[$size]['enabled'];
+            if ($existedImageSizesFromDb) {
+                if (isset($existedImageSizesFromDb[$size])) {
+                    $enabled = $existedImageSizesFromDb[$size]['enabled'];
                 }
             }
 
@@ -117,5 +122,12 @@ class AnalyzeThumbnails extends Service
         }
 
         return $sizes;
+    }
+
+    private function keepEnabledImageSizes()
+    {
+        add_action('init', function () {
+            $this->existedThumbnailsInfo = $this->getExistedThumbnailsInfo();
+        });
     }
 }

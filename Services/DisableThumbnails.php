@@ -90,7 +90,7 @@ class DisableThumbnails extends Service
 
             if (DOING_AJAX) {
                 wp_send_json([
-                    'status' => $this->toggleThumbnailActivation(filter_var($_POST['thumbnail_name'], FILTER_SANITIZE_STRING))
+                    'enabled' => $this->toggleThumbnailActivation(filter_var($_POST['thumbnail_name'], FILTER_SANITIZE_STRING))
                 ]);
 
                 wp_die();
@@ -100,15 +100,19 @@ class DisableThumbnails extends Service
 
     public function toggleThumbnailActivation($thumbnailName)
     {
-        if (in_array($thumbnailName, $this->existedThumbnailsInfo)) {
-            $this->existedThumbnailsInfo = array_diff($this->existedThumbnailsInfo, [$thumbnailName]);
-        } else {
-            $this->existedThumbnailsInfo[] = $thumbnailName;
+        $thumbnailEnabled = true;
+
+        if (isset($this->existedThumbnailsInfo[$thumbnailName])) {
+            $thumbnailEnabled = $this->existedThumbnailsInfo[$thumbnailName]['enabled'];
+            $this->existedThumbnailsInfo[$thumbnailName]['enabled'] = !$thumbnailEnabled;
+            update_option($this->dbOptionExistedImageSizes, $this->existedThumbnailsInfo, false);
         }
 
-        update_option($this->dbOptionExistedImageSizes, $this->existedThumbnailsInfo, false);
-        $dbEnabledImageSizes = get_option($this->dbOptionExistedImageSizes);
+        $dbExistedThumbnailsInfo = get_option($this->dbOptionExistedImageSizes);
+        if (isset($dbExistedThumbnailsInfo[$thumbnailName])) {
+            $thumbnailEnabled = $dbExistedThumbnailsInfo[$thumbnailName]['enabled'];
+        }
 
-        return in_array($thumbnailName, $dbEnabledImageSizes) ? 'enabled' : 'disabled';
+        return $thumbnailEnabled;
     }
 }
