@@ -9,11 +9,6 @@ class AnalyzeThumbnails extends Service
     private $dbOptionExistedImageSizes;
     private $existedThumbnailsInfo;
 
-    public function __construct(DisableThumbnails $disableThumbnails)
-    {
-        $this->existedThumbnailsInfo = $disableThumbnails->getExistedImageSizesInfo();
-    }
-
     public function register(string $prefix, string $adminPage)
     {
         $this->prefix = $prefix;
