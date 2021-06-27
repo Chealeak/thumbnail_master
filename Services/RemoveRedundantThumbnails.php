@@ -6,20 +6,18 @@ use ThumbnailMaster\Service;
 
 class RemoveRedundantThumbnails extends Service
 {
-    private $enabledImageSizes;
-
-    public function __construct(DisableThumbnails $disableThumbnails)
-    {
-        $this->enabledImageSizes = $disableThumbnails->getExistedImageSizesInfo();
-    }
+    private $dbOptionExistedImageSizes;
+    private $existedThumbnailsInfo;
 
     public function register(string $prefix, string $adminPage)
     {
         $this->prefix = $prefix;
         $this->adminPage = $adminPage;
+        $this->dbOptionExistedImageSizes = $prefix . 'existed_image_sizes';
 
         $this->enqueueScriptsAndStyles();
         $this->setAjaxRemoveRedundantHandler();
+        $this->keepEnabledImageSizes();
     }
 
     private function enqueueScriptsAndStyles()
@@ -64,16 +62,18 @@ class RemoveRedundantThumbnails extends Service
             $uploadDirectory = wp_upload_dir();
             $pathToFileDirectory = str_replace(basename($attachmentMeta['file']), '', trailingslashit($uploadDirectory['basedir']) . $attachmentMeta['file']);
             foreach ($attachmentMeta['sizes'] as $existedThumbnailName => $existedThumbnailInfo) {
-                if (!in_array($existedThumbnailName, $this->enabledImageSizes)) {
-                    $isSpecifiedThumbnailRemoving = (!empty($thumbnailNameToRemove) && ($thumbnailNameToRemove === $existedThumbnailName));
-                    $isDisabledThumbnailsRemoving = (empty($thumbnailNameToRemove));
+                if (isset($this->existedThumbnailsInfo[$existedThumbnailName])) {
+                    if (!$this->existedThumbnailsInfo[$existedThumbnailName]['enabled']) {
+                        $isSpecifiedThumbnailRemoving = (!empty($thumbnailNameToRemove) && ($thumbnailNameToRemove === $existedThumbnailName));
+                        $isDisabledThumbnailsRemoving = (empty($thumbnailNameToRemove));
 
-                    if ($isSpecifiedThumbnailRemoving || $isDisabledThumbnailsRemoving) {
-                        $filePath = realpath($pathToFileDirectory . $existedThumbnailInfo['file']);
-                        if ($filePath) {
-                            unlink($filePath);
+                        if ($isSpecifiedThumbnailRemoving || $isDisabledThumbnailsRemoving) {
+                            $filePath = realpath($pathToFileDirectory . $existedThumbnailInfo['file']);
+                            if ($filePath) {
+                                unlink($filePath);
+                            }
+                            unset($attachmentMeta['sizes'][$existedThumbnailName]);
                         }
-                        unset($attachmentMeta['sizes'][$existedThumbnailName]);
                     }
                 }
             }
@@ -91,5 +91,46 @@ class RemoveRedundantThumbnails extends Service
 
             wp_die();
         }
+    }
+
+    private function getExistedThumbnailsInfo()
+    {
+        global $_wp_additional_image_sizes;
+
+        $sizes = [];
+
+        $existedImageSizesFromDb = get_option($this->dbOptionExistedImageSizes);
+
+        foreach (get_intermediate_image_sizes() as $size) {
+            $enabled = true;
+            if ($existedImageSizesFromDb) {
+                if (isset($existedImageSizesFromDb[$size])) {
+                    $enabled = $existedImageSizesFromDb[$size]['enabled'];
+                }
+            }
+
+            if (in_array($size, ['thumbnail', 'medium', 'medium_large', 'large'])) {
+                $sizes[$size]['width'] = get_option("{$size}_size_w");
+                $sizes[$size]['height'] = get_option("{$size}_size_h");
+                $sizes[$size]['crop'] = (bool)get_option("{$size}_crop");
+                $sizes[$size]['enabled'] = $enabled;
+            } elseif (isset($_wp_additional_image_sizes[$size])) {
+                $sizes[$size] = [
+                    'width' => $_wp_additional_image_sizes[$size]['width'],
+                    'height' => $_wp_additional_image_sizes[$size]['height'],
+                    'crop' => $_wp_additional_image_sizes[$size]['crop'],
+                    'enabled' => $enabled
+                ];
+            }
+        }
+
+        return $sizes;
+    }
+
+    private function keepEnabledImageSizes()
+    {
+        add_action('init', function () {
+            $this->existedThumbnailsInfo = $this->getExistedThumbnailsInfo();
+        });
     }
 }
