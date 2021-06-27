@@ -13,7 +13,6 @@ class RegenerateThumbnails extends Service
     {
         $this->prefix = $prefix;
         $this->adminPage = $adminPage;
-
         $this->dbOptionExistedImageSizes = $prefix . 'existed_image_sizes';
 
         $this->enqueueScriptsAndStyles();
