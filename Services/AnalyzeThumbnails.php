@@ -6,11 +6,11 @@ use ThumbnailMaster\Service;
 
 class AnalyzeThumbnails extends Service
 {
-    private $disableThumbnails;
+    private $existedThumbnailsInfo;
 
     public function __construct(DisableThumbnails $disableThumbnails)
     {
-        $this->disableThumbnails = $disableThumbnails;
+        $this->existedThumbnailsInfo = $disableThumbnails->getExistedImageSizesInfo();
     }
 
     public function register(string $prefix, string $adminPage)
@@ -92,22 +92,26 @@ class AnalyzeThumbnails extends Service
         global $_wp_additional_image_sizes;
 
         $sizes = [];
-        $enabledThumbnailSizes = $this->disableThumbnails->getExistedImageSizesInfo();
 
         foreach (get_intermediate_image_sizes() as $size) {
-            $thumbnailEnabled = in_array($size, $enabledThumbnailSizes);
+            $enabled = true;
+            if ($this->existedThumbnailsInfo) {
+                if (isset($this->existedThumbnailsInfo[$size])) {
+                    $enabled = $this->existedThumbnailsInfo[$size]['enabled'];
+                }
+            }
 
             if (in_array($size, ['thumbnail', 'medium', 'medium_large', 'large'])) {
                 $sizes[$size]['width'] = get_option("{$size}_size_w");
                 $sizes[$size]['height'] = get_option("{$size}_size_h");
                 $sizes[$size]['crop'] = (bool)get_option("{$size}_crop");
-                $sizes[$size]['enabled'] = $thumbnailEnabled;
+                $sizes[$size]['enabled'] = $enabled;
             } elseif (isset($_wp_additional_image_sizes[$size])) {
                 $sizes[$size] = [
                     'width' => $_wp_additional_image_sizes[$size]['width'],
                     'height' => $_wp_additional_image_sizes[$size]['height'],
                     'crop' => $_wp_additional_image_sizes[$size]['crop'],
-                    'enabled' => $thumbnailEnabled
+                    'enabled' => $enabled
                 ];
             }
         }
