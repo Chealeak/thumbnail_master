@@ -6,16 +6,11 @@ use ThumbnailMaster\Service;
 
 class AnalyzeThumbnails extends Service
 {
-    private $dbOptionExistedImageSizes;
-    private $existedThumbnailsInfo;
-
     public function register(string $prefix, string $adminPage)
     {
         $this->prefix = $prefix;
         $this->adminPage = $adminPage;
         $this->dbOptionExistedImageSizes = $prefix . 'existed_image_sizes';
-
-        $this->keepEnabledImageSizes();
 
         add_action('admin_init', [$this, 'adminPageInit']);
     }
@@ -41,7 +36,7 @@ class AnalyzeThumbnails extends Service
         $table .= '<th>Actions</th>';
         $table .= '</tr>';
 
-        foreach ($this->existedThumbnailsInfo as $thumbnailName => $thumbnailInfo) {
+        foreach ($this->storedThumbnailsInfo as $thumbnailName => $thumbnailInfo) {
             $table .= '<tr>';
             $table .= "<td>{$thumbnailName}</td>";
             $table .= "<td>{$thumbnailInfo['width']}x{$thumbnailInfo['height']}</td>";
@@ -83,46 +78,5 @@ class AnalyzeThumbnails extends Service
         $checkboxes .= "</form>";
 
         echo $table . $allImages . $checkboxes;
-    }
-
-    private function getExistedThumbnailsInfo()
-    {
-        global $_wp_additional_image_sizes;
-
-        $sizes = [];
-
-        $existedImageSizesFromDb = get_option($this->dbOptionExistedImageSizes);
-
-        foreach (get_intermediate_image_sizes() as $size) {
-            $enabled = true;
-            if ($existedImageSizesFromDb) {
-                if (isset($existedImageSizesFromDb[$size])) {
-                    $enabled = $existedImageSizesFromDb[$size]['enabled'];
-                }
-            }
-
-            if (in_array($size, ['thumbnail', 'medium', 'medium_large', 'large'])) {
-                $sizes[$size]['width'] = get_option("{$size}_size_w");
-                $sizes[$size]['height'] = get_option("{$size}_size_h");
-                $sizes[$size]['crop'] = (bool)get_option("{$size}_crop");
-                $sizes[$size]['enabled'] = $enabled;
-            } elseif (isset($_wp_additional_image_sizes[$size])) {
-                $sizes[$size] = [
-                    'width' => $_wp_additional_image_sizes[$size]['width'],
-                    'height' => $_wp_additional_image_sizes[$size]['height'],
-                    'crop' => $_wp_additional_image_sizes[$size]['crop'],
-                    'enabled' => $enabled
-                ];
-            }
-        }
-
-        return $sizes;
-    }
-
-    private function keepEnabledImageSizes()
-    {
-        add_action('init', function () {
-            $this->existedThumbnailsInfo = $this->getExistedThumbnailsInfo();
-        });
     }
 }
