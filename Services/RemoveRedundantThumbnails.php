@@ -3,7 +3,6 @@
 namespace ThumbnailMaster\Services;
 
 use ThumbnailMaster\Service;
-use ThumbnailMaster\Storage;
 
 class RemoveRedundantThumbnails extends Service
 {

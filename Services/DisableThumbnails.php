@@ -6,8 +6,6 @@ use ThumbnailMaster\Service;
 
 class DisableThumbnails extends Service
 {
-    private $dbOptionExistedImageSizes;
-
     public function register(string $prefix, string $adminPage)
     {
         $this->prefix = $prefix;

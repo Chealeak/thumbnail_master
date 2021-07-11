@@ -4,8 +4,8 @@ namespace ThumbnailMaster;
 
 class Storage
 {
-    private $dbOptionExistedImageSizes;
-    private $storedThumbnailsInfo;
+    private string $dbOptionExistedImageSizes;
+    private array $storedThumbnailsInfo;
 
     public function __construct()
     {
