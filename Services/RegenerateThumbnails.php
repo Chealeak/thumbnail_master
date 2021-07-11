@@ -14,6 +14,9 @@ class RegenerateThumbnails extends Service
 
         $this->enqueueScriptsAndStyles();
         $this->setAjaxRegenerationHandler();
+        add_action('init', function () {
+            $this->prepareForRegeneration();
+        });
     }
 
     public function sanitizeOptionField($input)
@@ -60,7 +63,7 @@ class RegenerateThumbnails extends Service
         wp_die();
     }
 
-    public function regenerate($thumbnailName = null)
+    public function regenerate($singleThumbnailName = null)
     {
         require_once(ABSPATH . 'wp-admin/includes/admin.php');
         require_once(ABSPATH . 'wp-includes/pluggable.php');
@@ -68,35 +71,7 @@ class RegenerateThumbnails extends Service
         global $wpdb;
         $imagesExisted = $wpdb->get_results("SELECT ID FROM $wpdb->posts WHERE post_type='attachment' AND post_mime_type LIKE 'image/%'");
 
-        $defaultImageSizesToRemove = [];
-
-        foreach ($this->storedThumbnailsInfo as $imageInfoName => $imageInfo) {
-            $isDefaultImageSize = in_array($imageInfoName, ['thumbnail', 'medium', 'medium_large', 'large']);
-            if ($isDefaultImageSize && !$imageInfo['enabled']) {
-                $defaultImageSizesToRemove[] = $imageInfoName;
-            }
-        }
-
-        if (!is_null($thumbnailName) ) {
-            foreach ($this->storedThumbnailsInfo as $imageInfoName => $imageInfo)
-                if ($thumbnailName !== $imageInfoName) {
-                    remove_image_size($imageInfoName);
-                }
-        } else {
-            foreach ($this->storedThumbnailsInfo as $imageInfoName => $imageInfo) {
-                if (!$imageInfo['enabled']) {
-                    remove_image_size($imageInfoName);
-                }
-            }
-        }
-
-        add_filter('intermediate_image_sizes_advanced', function ($sizes) use ($defaultImageSizesToRemove) {
-            foreach ($defaultImageSizesToRemove as $defaultImageSizeName) {
-                unset($sizes[$defaultImageSizeName]);
-            }
-
-            return $sizes;
-        });
+        $this->prepareForRegeneration($singleThumbnailName);
 
         foreach ($imagesExisted as $image) {
             $imageFullSizePath = get_attached_file($image->ID);
@@ -122,9 +97,9 @@ class RegenerateThumbnails extends Service
             }
         }
 
-        if (!is_null($thumbnailName) ) {
+        if (!is_null($singleThumbnailName) ) {
             foreach ($this->storedThumbnailsInfo as $imageInfoName => $imageInfo)
-                if ($thumbnailName !== $imageInfoName) {
+                if ($singleThumbnailName !== $imageInfoName) {
                     add_image_size($imageInfoName, $imageInfo['width'], $imageInfo['height'], $imageInfo['crop']);
                 }
         } else {
@@ -134,5 +109,38 @@ class RegenerateThumbnails extends Service
                 }
             }
         }
+    }
+
+    private function prepareForRegeneration($singleThumbnailName = null)
+    {
+        $defaultImageSizesToRemove = [];
+
+        foreach ($this->storedThumbnailsInfo as $imageInfoName => $imageInfo) {
+            $isDefaultImageSize = in_array($imageInfoName, ['thumbnail', 'medium', 'medium_large', 'large']);
+            if ($isDefaultImageSize && !$imageInfo['enabled']) {
+                $defaultImageSizesToRemove[] = $imageInfoName;
+            }
+        }
+
+        if (!is_null($singleThumbnailName) ) {
+            foreach ($this->storedThumbnailsInfo as $imageInfoName => $imageInfo)
+                if ($singleThumbnailName !== $imageInfoName) {
+                    remove_image_size($imageInfoName);
+                }
+        } else {
+            foreach ($this->storedThumbnailsInfo as $imageInfoName => $imageInfo) {
+                if (!$imageInfo['enabled']) {
+                    remove_image_size($imageInfoName);
+                }
+            }
+        }
+
+        add_filter('intermediate_image_sizes_advanced', function ($sizes) use ($defaultImageSizesToRemove) {
+            foreach ($defaultImageSizesToRemove as $defaultImageSizeName) {
+                unset($sizes[$defaultImageSizeName]);
+            }
+
+            return $sizes;
+        });
     }
 }
