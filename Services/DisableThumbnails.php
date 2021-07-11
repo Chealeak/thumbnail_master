@@ -52,7 +52,7 @@ class DisableThumbnails extends Service
     {
         $thumbnailEnabled = true;
 
-        if (isset($this->existedThumbnailsInfo[$thumbnailName])) {
+        if (isset($this->storedThumbnailsInfo[$thumbnailName])) {
             $thumbnailEnabled = $this->storedThumbnailsInfo[$thumbnailName]['enabled'];
             $this->storedThumbnailsInfo[$thumbnailName]['enabled'] = !$thumbnailEnabled;
             update_option($this->dbOptionExistedImageSizes, $this->storedThumbnailsInfo, false);
