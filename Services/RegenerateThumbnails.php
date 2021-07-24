@@ -17,6 +17,7 @@ class RegenerateThumbnails extends Service
         add_action('init', function () {
             $this->prepareForRegeneration();
         });
+        $this->regenerateOnFly();
     }
 
     public function sanitizeOptionField($input)
@@ -65,36 +66,13 @@ class RegenerateThumbnails extends Service
 
     public function regenerate($singleThumbnailName = null)
     {
-        require_once(ABSPATH . 'wp-admin/includes/admin.php');
-        require_once(ABSPATH . 'wp-includes/pluggable.php');
-
         global $wpdb;
         $imagesExisted = $wpdb->get_results("SELECT ID FROM $wpdb->posts WHERE post_type='attachment' AND post_mime_type LIKE 'image/%'");
 
         $this->prepareForRegeneration($singleThumbnailName);
 
         foreach ($imagesExisted as $image) {
-            $imageFullSizePath = get_attached_file($image->ID);
-
-            if (file_exists($imageFullSizePath)) {
-                $attachmentMetadata = wp_generate_attachment_metadata($image->ID, $imageFullSizePath);
-
-                if (isset($attachmentMetadata['sizes'])) {
-                    foreach ($attachmentMetadata['sizes'] as $sizeName => $sizeInfo) {
-                        if (isset($this->storedThumbnailsInfo[$sizeName])) {
-                            if (!$this->storedThumbnailsInfo[$sizeName]['enabled']) {
-                                unset($attachmentMetadata['sizes'][$sizeName]);
-                            }
-                        }
-                    }
-                }
-
-                if (wp_update_attachment_metadata($image->ID, $attachmentMetadata)) {
-
-                } else {
-
-                }
-            }
+            $this->regenerateSingleImage($image->ID);
         }
 
         if (!is_null($singleThumbnailName) ) {
@@ -142,5 +120,42 @@ class RegenerateThumbnails extends Service
 
             return $sizes;
         });
+    }
+
+    public function regenerateSingleImage($imageId)
+    {
+        require_once(ABSPATH . 'wp-admin/includes/admin.php');
+        require_once(ABSPATH . 'wp-includes/pluggable.php');
+
+        $imageFullSizePath = get_attached_file($imageId);
+
+        if (file_exists($imageFullSizePath)) {
+            $attachmentMetadata = wp_generate_attachment_metadata($imageId, $imageFullSizePath);
+
+            if (isset($attachmentMetadata['sizes'])) {
+                foreach ($attachmentMetadata['sizes'] as $sizeName => $sizeInfo) {
+                    if (isset($this->storedThumbnailsInfo[$sizeName])) {
+                        if (!$this->storedThumbnailsInfo[$sizeName]['enabled']) {
+                            unset($attachmentMetadata['sizes'][$sizeName]);
+                        }
+                    }
+                }
+            }
+
+            if (wp_update_attachment_metadata($imageId, $attachmentMetadata)) {
+
+            } else {
+
+            }
+        }
+    }
+
+    public function regenerateOnFly()
+    {
+        add_filter('wp_get_attachment_image_src', function ($image, $attachment_id, $size, $icon) {
+            $this->regenerateSingleImage($attachment_id);
+
+            return $image;
+        }, 10, 5);
     }
 }
