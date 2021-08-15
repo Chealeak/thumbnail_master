@@ -6,9 +6,10 @@ use ThumbnailMaster\Service;
 
 class RegenerateThumbnails extends Service
 {
-    public function register(string $prefix, string $adminPage)
+    public function register(string $prefix, string $textDomain, string $adminPage)
     {
         $this->prefix = $prefix;
+        $this->textDomain = $textDomain;
         $this->adminPage = $adminPage;
         $this->dbOptionExistedImageSizes = $prefix . 'existed_image_sizes';
 
@@ -40,8 +41,8 @@ class RegenerateThumbnails extends Service
                     'ajaxurl' => admin_url('admin-ajax.php')
                 ]
             );
-            wp_enqueue_script($this->prefix . 'loading-bar', plugin_dir_url(__DIR__) . 'assets/js/loading-bar.min.js', ['jquery'], null, true);
-            wp_enqueue_style($this->prefix . 'loading-bar', plugin_dir_url(__DIR__) . 'assets/css/loading-bar.min.css');
+/*            wp_enqueue_script($this->prefix . 'loading-bar', plugin_dir_url(__DIR__) . 'assets/js/loading-bar.min.js', ['jquery'], null, true);
+            wp_enqueue_style($this->prefix . 'loading-bar', plugin_dir_url(__DIR__) . 'assets/css/loading-bar.min.css');*/
             wp_enqueue_script($this->prefix . 'common', plugin_dir_url(__DIR__) . 'assets/js/common.js', ['jquery'], null, true);
         });
     }

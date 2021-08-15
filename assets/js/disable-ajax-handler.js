@@ -16,8 +16,10 @@ jQuery(document).ready(function() {
             success: function(data) {
                 if (data['enabled']) {
                     disableButton.text('Disable');
+                    disableButton.removeClass('is-info');
                 } else {
                     disableButton.text('Enable');
+                    disableButton.addClass('is-info');
                 }
             }
         });

@@ -6,7 +6,7 @@ jQuery(document).ready(function() {
 function regenerate(event) {
     event.preventDefault();
 
-    var bar = new ldBar("#th_m_progressbar");
+    //var bar = new ldBar("#th_m_progressbar");
 
     const thumbnailName = jQuery(this).attr('data-thumbnail-name');
     const thumbnailNameActionPart = thumbnailName ? ('&thumbnailName=' + thumbnailName) : '';
@@ -21,7 +21,7 @@ function regenerate(event) {
         success: function(data) {
             jQuery('.th_m_regenerate-button-js').text('Regenerate');
         },
-        xhr: function() {
+/*        xhr: function() {
             var xhr = new XMLHttpRequest();
             xhr.onprogress = function(event) {
                 if (event.lengthComputable === false) {
@@ -31,6 +31,6 @@ function regenerate(event) {
                 }
             };
             return xhr;
-        }
+        }*/
     });
 }

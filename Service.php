@@ -5,6 +5,7 @@ namespace ThumbnailMaster;
 abstract class Service
 {
     protected string $prefix;
+    protected string $textDomain;
     protected string $adminPage;
     protected string $dbOptionExistedImageSizes;
 
@@ -17,5 +18,5 @@ abstract class Service
         });
     }
 
-    abstract public function register(string $prefix, string $adminPage);
+    abstract public function register(string $prefix, string $textDomain, string $adminPage);
 }

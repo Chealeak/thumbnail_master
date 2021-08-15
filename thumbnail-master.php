@@ -42,7 +42,8 @@ if (file_exists(dirname(__FILE__) . '/vendor/autoload.php')) {
 final class ThumbnailMaster
 {
     const PLUGIN_PREFIX = 'th_m_';
-    const ADMIN_PAGE = self::PLUGIN_PREFIX . 'regenerate_thumbnails';
+    const PLUGIN_TEXT_DOMAIN = 'thumbnail_master';
+    const ADMIN_PAGE = self::PLUGIN_PREFIX . 'thumbnail_master';
 
     private static $instance;
     private $container;
@@ -111,7 +112,7 @@ final class ThumbnailMaster
 
             if (class_exists($serviceNameWithNamespace)) {
                 $service = $this->container->get($serviceNameWithNamespace);
-                $service->register(self::PLUGIN_PREFIX, self::ADMIN_PAGE);
+                $service->register(self::PLUGIN_PREFIX, self::PLUGIN_TEXT_DOMAIN, self::ADMIN_PAGE);
             }
         }
     }
