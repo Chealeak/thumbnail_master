@@ -39,6 +39,8 @@ class AnalyzeThumbnails extends Service
 
     public function printSectionInfo()
     {
+        $sectionWrapperStart = '<div class="section">';
+
         $sectionTitle = '<h1 class="title is-4">' . __('Thumbnail master', $this->textDomain) . '</h1>';
 
         $allImages = '<h2 class="title is-6">' . __('All images', $this->textDomain) . '</h2>';
@@ -46,12 +48,12 @@ class AnalyzeThumbnails extends Service
             <div class='block'>
                 <div class='block'>
                     <p><strong>" . __('Regenerate all active thumbnails', $this->textDomain) . "</strong></p>
-                    <button class='button button-primary {$this->prefix}regenerate-button-js'>Regenerate All</button>
+                    <button class='bulma-button is-info {$this->prefix}regenerate-button-js'>" . __('Regenerate All', $this->textDomain) . "</button>
                 </div>
                 
                 <div class='block'>
                     <p><strong>" . __('Remove all redundant thumbnails that are not used in the system', $this->textDomain) . "</strong></p>
-                    <button class='button button-primary {$this->prefix}remove-redundant-button-js'>Remove All</button>
+                    <button class='bulma-button is-info {$this->prefix}remove-redundant-button-js'>" . __('Remove All', $this->textDomain) . "</button>
                     <div class='{$this->prefix}remove-redundant-result-js' data-page='1'></div>
                 </div>
                 <!--<button class='button button-primary'>Backup uploads</button>-->
@@ -76,17 +78,17 @@ class AnalyzeThumbnails extends Service
                 <!--<div><input type='checkbox'>Enable WebP</div>-->
             </div>
         ";
-        $checkboxes .= "<p class='submit'><input type='submit' name='submit' id='submit' class='button button-primary' value='Save Changes'></p>";
+        $checkboxes .= "<input type='submit' name='submit' id='submit' class='bulma-button is-link' value='Save Changes'></p>";
         $checkboxes .= "</form>";
 
-        $table = '<h2 class="title is-6">' . __('All image sizes', $this->textDomain) . '</h2>';
+        $table = '<h2 class="title is-6">' . __('Existed image sizes', $this->textDomain) . '</h2>';
         $table .= '<table class="table is-bordered is-striped is-hoverable">';
 
-        $table .= '<tr>';
-        $table .= '<th>Name</th>';
-        $table .= '<th>Size</th>';
-        $table .= '<th>Crop</th>';
-        $table .= '<th colspan="3">Actions</th>';
+        $table .= '<tr class="has-text-centered">';
+        $table .= '<th>' . __('Name', $this->textDomain) . '</th>';
+        $table .= '<th>' . __('Size', $this->textDomain) . '</th>';
+        $table .= '<th>' . __('Crop', $this->textDomain) . '</th>';
+        $table .= '<th colspan="3">' . __('Actions', $this->textDomain) . '</th>';
         $table .= '</tr>';
 
         foreach ($this->storedThumbnailsInfo as $thumbnailName => $thumbnailInfo) {
@@ -94,17 +96,17 @@ class AnalyzeThumbnails extends Service
             $table .= "<td>{$thumbnailName}</td>";
             $table .= "<td>{$thumbnailInfo['width']}x{$thumbnailInfo['height']}</td>";
             $table .= "<td>" . ($thumbnailInfo['crop'] ? 'Yes' : 'No') . "</td>";
-            $disableButtonTitle = ($thumbnailInfo['enabled'] ? 'Disable' : 'Enable');
+            $disableButtonTitle = ($thumbnailInfo['enabled'] ? __('Disable', $this->textDomain) : __('Enable', $this->textDomain));
             $disableButtonExtraClass = ($thumbnailInfo['enabled'] ? '' : 'is-info');
             $table .= "
                 <td>
                     <button class='bulma-button $disableButtonExtraClass {$this->prefix}disable-button-js {$this->prefix}disable-button-{$thumbnailName}-js' data-thumbnail-name='" . $thumbnailName . "'>{$disableButtonTitle}</button>
                 </td>
                 <td>
-                    <button class='bulma-button is-link is-outlined {$this->prefix}regenerate-single-button-js' data-thumbnail-name='" . $thumbnailName . "'>Regenerate</button>
+                    <button class='bulma-button is-info is-outlined {$this->prefix}regenerate-single-button-js' data-thumbnail-name='" . $thumbnailName . "'>" . __('Regenerate', $this->textDomain) . "</button>
                 </td>
                 <td>
-                    <button class='bulma-button is-link is-outlined {$this->prefix}remove-redundant-single-button-js' data-thumbnail-name='" . $thumbnailName . "'>Remove redundant</button>
+                    <button class='bulma-button is-info is-outlined {$this->prefix}remove-redundant-single-button-js' data-thumbnail-name='" . $thumbnailName . "'>" . __('Remove Redundant', $this->textDomain) . "</button>
                 </td>
             ";
             $table .= '</tr>';
@@ -112,9 +114,13 @@ class AnalyzeThumbnails extends Service
 
         $table .= '</table>';
 
+        $sectionWrapperEnd = '</div>';
+
         echo
+            $sectionWrapperStart .
             $sectionTitle .
-            "<div class='box'>" . $allImages . $checkboxes . "</div>" .
-            "<div class='box'>" . $table . "</div>";
+            "<section class='box'>" . $allImages . $checkboxes . "</section>" .
+            "<section class='box'>" . $table . "</section>" .
+            $sectionWrapperEnd;
     }
 }
