@@ -41,7 +41,7 @@ class AnalyzeThumbnails extends Service
     {
         $sectionWrapperStart = '<div class="section">';
 
-        $sectionTitle = '<h1 class="title is-4">' . __('Thumbnail master', $this->textDomain) . '</h1>';
+        $sectionTitle = '<h1 class="title is-4">' . __('Thumbnail Master', $this->textDomain) . '</h1>';
 
         $allImages = '<h2 class="title is-6">' . __('All images', $this->textDomain) . '</h2>';
         $allImages .= "
