@@ -88,8 +88,8 @@ final class ThumbnailMaster
     public function addAdminPage()
     {
         add_menu_page(
-            'Thumbnail Master',
-            'Thumbnail Master',
+            __('Thumbnail Master', self::PLUGIN_TEXT_DOMAIN),
+            __('Thumbnail Master', self::PLUGIN_TEXT_DOMAIN),
             'manage_options',
             self::ADMIN_PAGE,
             [$this, 'renderAdminPage']

@@ -39,6 +39,15 @@ class AnalyzeThumbnails extends Service
 
     public function printSectionInfo()
     {
+        $noticesWrapper = "
+            <div class='
+                " . $this->prefix . "notices'
+                data-regenerate-success-text='" . __('Regeneration is done!', $this->textDomain) . "'
+                data-remove-redundant-success-text='" . __('Removing is done!', $this->textDomain) . "'
+                data-dismiss-notice-text='" . __('Dismiss this notice.', $this->textDomain) . "'>
+            </div>
+        ";
+
         $sectionWrapperStart = '<div class="section">';
 
         $sectionTitle = '<h1 class="title is-4">' . __('Thumbnail Master', $this->textDomain) . '</h1>';
@@ -48,12 +57,12 @@ class AnalyzeThumbnails extends Service
             <div class='block'>
                 <div class='block'>
                     <p><strong>" . __('Regenerate all active thumbnails', $this->textDomain) . "</strong></p>
-                    <button class='bulma-button is-info {$this->prefix}regenerate-button-js'>" . __('Regenerate All', $this->textDomain) . "</button>
+                    <button class='bulma-button is-info {$this->prefix}regenerate-button-js' data-in-process-text='" . __('Regenerating...', $this->textDomain) . "'>" . __('Regenerate All', $this->textDomain) . "</button>
                 </div>
                 
                 <div class='block'>
                     <p><strong>" . __('Remove all redundant thumbnails that are not used in the system', $this->textDomain) . "</strong></p>
-                    <button class='bulma-button is-info {$this->prefix}remove-redundant-button-js'>" . __('Remove All', $this->textDomain) . "</button>
+                    <button class='bulma-button is-info {$this->prefix}remove-redundant-button-js' data-in-process-text='" . __('Removing...', $this->textDomain) . "'>" . __('Remove All', $this->textDomain) . "</button>
                     <div class='{$this->prefix}remove-redundant-result-js' data-page='1'></div>
                 </div>
                 <!--<button class='button button-primary'>Backup uploads</button>-->
@@ -117,6 +126,7 @@ class AnalyzeThumbnails extends Service
         $sectionWrapperEnd = '</div>';
 
         echo
+            $noticesWrapper .
             $sectionWrapperStart .
             $sectionTitle .
             "<section class='box'>" . $allImages . $checkboxes . "</section>" .
