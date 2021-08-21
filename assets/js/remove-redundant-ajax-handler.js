@@ -6,6 +6,13 @@ jQuery(document).ready(function() {
 function removeRedundant(event) {
     event.preventDefault();
 
+    const resultElement = jQuery('.' + remove_redundant_ajax_handler.prefix + 'remove-redundant-result-js');
+    resultElement.attr('data-page', 1);
+
+    removeRedundantRecursive(event);
+}
+
+function removeRedundantRecursive(event) {
     const removeButton = jQuery('.' + remove_redundant_ajax_handler.prefix + 'remove-redundant-button-js');
     const removeButtonText = removeButton.text();
     const removeButtonInProcessText = removeButton.data('in-process-text');
@@ -32,7 +39,7 @@ function removeRedundant(event) {
         success: function(data) {
             if (!data['completed']) {
                 resultElement.attr('data-page', parseInt(page) + 1);
-                removeRedundant(event);
+                removeRedundantRecursive(event);
             } else {
                 const noticeHtml = "" +
                         "<div class='notice notice-success is-dismissible'>" +
