@@ -112,10 +112,10 @@ class AnalyzeThumbnails extends Service
                     <button class='bulma-button $disableButtonExtraClass {$this->prefix}disable-button-js {$this->prefix}disable-button-{$thumbnailName}-js' data-thumbnail-name='" . $thumbnailName . "'>{$disableButtonTitle}</button>
                 </td>
                 <td>
-                    <button class='bulma-button is-info is-outlined {$this->prefix}regenerate-single-button-js' data-thumbnail-name='" . $thumbnailName . "'>" . __('Regenerate', $this->textDomain) . "</button>
+                    <button class='bulma-button is-info is-outlined {$this->prefix}regenerate-single-button-js' data-thumbnail-name='" . $thumbnailName . "' " . ($thumbnailInfo['enabled'] ? '' : 'disabled') . ">" . __('Regenerate', $this->textDomain) . "</button>
                 </td>
                 <td>
-                    <button class='bulma-button is-info is-outlined {$this->prefix}remove-redundant-single-button-js' data-thumbnail-name='" . $thumbnailName . "'>" . __('Remove Redundant', $this->textDomain) . "</button>
+                    <button class='bulma-button is-info is-outlined {$this->prefix}remove-redundant-single-button-js' data-thumbnail-name='" . $thumbnailName . "' " . ($thumbnailInfo['enabled'] ? 'disabled' : '') . ">" . __('Remove Redundant', $this->textDomain) . "</button>
                 </td>
             ";
             $table .= '</tr>';

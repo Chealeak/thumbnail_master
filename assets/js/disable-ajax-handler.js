@@ -4,6 +4,8 @@ jQuery(document).ready(function() {
 
         const thumbnailName = jQuery(this).attr('data-thumbnail-name');
         const disableButton = jQuery('.' + disable_ajax_handler.prefix + 'disable-button-' + thumbnailName + '-js');
+        const regenerateSingleButton = jQuery('.th_m_regenerate-single-button-js[data-thumbnail-name="' + thumbnailName + '"]')
+        const removeRedundantSingleButton = jQuery('.th_m_remove-redundant-single-button-js[data-thumbnail-name="' + thumbnailName + '"]')
 
         jQuery.ajax({
             url: disable_ajax_handler.ajaxurl,
@@ -17,9 +19,13 @@ jQuery(document).ready(function() {
                 if (data['enabled']) {
                     disableButton.text('Disable');
                     disableButton.removeClass('is-info');
+                    regenerateSingleButton.removeAttr('disabled');
+                    removeRedundantSingleButton.attr('disabled', 'disabled');
                 } else {
                     disableButton.text('Enable');
                     disableButton.addClass('is-info');
+                    regenerateSingleButton.attr('disabled', 'disabled');
+                    removeRedundantSingleButton.removeAttr('disabled');
                 }
             }
         });
