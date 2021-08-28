@@ -6,12 +6,10 @@ jQuery(document).ready(function() {
 function regenerate(event) {
     event.preventDefault();
 
-    //var bar = new ldBar("#th_m_progressbar");
-
     const thumbnailName = jQuery(this).attr('data-thumbnail-name');
     const thumbnailNameActionPart = thumbnailName ? ('&thumbnailName=' + thumbnailName) : '';
 
-    const regenerateButton = jQuery('.th_m_regenerate-button-js');
+    const regenerateButton = jQuery(this);
     const regenerateButtonText = regenerateButton.text();
     const regenerateButtonInProcessText = regenerateButton.data('in-process-text');
 
@@ -25,6 +23,7 @@ function regenerate(event) {
         data: 'action=th_m_regenerate_thumbnails' + thumbnailNameActionPart,
         beforeSend: function(xhr) {
             regenerateButton.text(regenerateButtonInProcessText);
+            regenerateButton.addClass('is-loading');
         },
         success: function(data) {
             const noticeHtml = "" +
@@ -33,19 +32,9 @@ function regenerate(event) {
                         "<button onclick='this.closest(\".notice\").remove()' type='button' class='notice-dismiss'><span class='screen-reader-text'>" + dismissNoticeText + "</span></button>" +
                     "</div>" +
                 "";
-            noticeWrapperHtml.append(noticeHtml);
+            regenerateButton.removeClass('is-loading');
             regenerateButton.text(regenerateButtonText);
-        },
-/*        xhr: function() {
-            var xhr = new XMLHttpRequest();
-            xhr.onprogress = function(event) {
-                if (event.lengthComputable === false) {
-                    bar.set((event.loaded / event.total) * 100);
-                } else {
-                    bar.set(event.loaded);
-                }
-            };
-            return xhr;
-        }*/
+            noticeWrapperHtml.append(noticeHtml);
+        }
     });
 }

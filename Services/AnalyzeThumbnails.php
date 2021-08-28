@@ -62,8 +62,7 @@ class AnalyzeThumbnails extends Service
                 
                 <div class='block'>
                     <p><strong>" . __('Remove all redundant thumbnails that are not used in the system', $this->textDomain) . "</strong></p>
-                    <button class='bulma-button is-info {$this->prefix}remove-redundant-button-js' data-in-process-text='" . __('Removing...', $this->textDomain) . "'>" . __('Remove All', $this->textDomain) . "</button>
-                    <div class='{$this->prefix}remove-redundant-result-js' data-page='1'></div>
+                    <button class='bulma-button is-info {$this->prefix}remove-redundant-button-js' data-page='1' data-in-process-text='" . __('Removing...', $this->textDomain) . "'>" . __('Remove All', $this->textDomain) . "</button>
                 </div>
                 <!--<button class='button button-primary'>Backup uploads</button>-->
             </div>
@@ -115,7 +114,7 @@ class AnalyzeThumbnails extends Service
                     <button class='bulma-button is-info is-outlined {$this->prefix}regenerate-single-button-js' data-thumbnail-name='" . $thumbnailName . "' " . ($thumbnailInfo['enabled'] ? '' : 'disabled') . ">" . __('Regenerate', $this->textDomain) . "</button>
                 </td>
                 <td>
-                    <button class='bulma-button is-info is-outlined {$this->prefix}remove-redundant-single-button-js' data-thumbnail-name='" . $thumbnailName . "' " . ($thumbnailInfo['enabled'] ? 'disabled' : '') . ">" . __('Remove Redundant', $this->textDomain) . "</button>
+                    <button class='bulma-button is-info is-outlined {$this->prefix}remove-redundant-single-button-js' data-page='1' data-thumbnail-name='" . $thumbnailName . "' " . ($thumbnailInfo['enabled'] ? 'disabled' : '') . ">" . __('Remove Redundant', $this->textDomain) . "</button>
                 </td>
             ";
             $table .= '</tr>';

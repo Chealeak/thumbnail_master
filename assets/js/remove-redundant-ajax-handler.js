@@ -6,22 +6,59 @@ jQuery(document).ready(function() {
 function removeRedundant(event) {
     event.preventDefault();
 
-    const resultElement = jQuery('.' + remove_redundant_ajax_handler.prefix + 'remove-redundant-result-js');
-    resultElement.attr('data-page', 1);
+    jQuery(this).attr('data-page', 1);
     const thumbnailName = jQuery(this).attr('data-thumbnail-name');
 
-    removeRedundantRecursive(event, thumbnailName);
+    if (thumbnailName) {
+        removeRedundantSingle(jQuery(this), thumbnailName);
+    } else {
+        removeRedundantAll(jQuery(this));
+    }
 }
 
-function removeRedundantRecursive(event, thumbnailName) {
-    const removeButton = jQuery('.' + remove_redundant_ajax_handler.prefix + 'remove-redundant-button-js');
+function removeRedundantAll(removeButton) {
     const removeButtonText = removeButton.text();
     const removeButtonInProcessText = removeButton.data('in-process-text');
-    const resultElement = jQuery('.' + remove_redundant_ajax_handler.prefix + 'remove-redundant-result-js');
-    const page = resultElement.attr('data-page');
+    const page = removeButton.attr('data-page');
+    const noticeWrapperHtml = jQuery('.th_m_notices');
+    const removeRedundantSuccessNoticeText = noticeWrapperHtml.data('remove-redundant-success-text');
+    const dismissNoticeText = noticeWrapperHtml.data('dismiss-notice-text')
 
+    jQuery.ajax({
+        url: remove_redundant_ajax_handler.ajaxurl,
+        type: 'POST',
+        data: 'action=' + remove_redundant_ajax_handler.prefix + 'remove_redundant_thumbnails&page=' + page,
+        dataType: 'json',
+        beforeSend: function(xhr) {
+            if (parseInt(page) !== 1) {
+                removeButton.addClass('is-loading');
+                removeButton.text(removeButtonInProcessText);
+            }
+        },
+        success: function(data) {
+            if (!data['completed']) {
+                removeButton.attr('data-page', parseInt(page) + 1);
+                removeRedundantAll(removeButton);
+            } else {
+                const noticeHtml = "" +
+                        "<div class='notice notice-success is-dismissible'>" +
+                            "<p>" + removeRedundantSuccessNoticeText + "</p>" +
+                            "<button onclick='this.closest(\".notice\").remove()' type='button' class='notice-dismiss'><span class='screen-reader-text'>" + dismissNoticeText + "</span></button>" +
+                        "</div>" +
+                    "";
+                removeButton.removeClass('is-loading');
+                removeButton.text(removeButtonText);
+                noticeWrapperHtml.append(noticeHtml);
+            }
+        }
+    });
+}
+
+function removeRedundantSingle(removeButton, thumbnailName) {
+    const removeButtonText = removeButton.text();
+    const removeButtonInProcessText = removeButton.data('in-process-text');
+    const page = removeButton.attr('data-page');
     const thumbnailNameActionPart = thumbnailName ? ('&thumbnailName=' + thumbnailName) : '';
-
     const noticeWrapperHtml = jQuery('.th_m_notices');
     const removeRedundantSuccessNoticeText = noticeWrapperHtml.data('remove-redundant-success-text');
     const dismissNoticeText = noticeWrapperHtml.data('dismiss-notice-text')
@@ -38,14 +75,14 @@ function removeRedundantRecursive(event, thumbnailName) {
         },
         success: function(data) {
             if (!data['completed']) {
-                resultElement.attr('data-page', parseInt(page) + 1);
-                removeRedundantRecursive(event, thumbnailName);
+                removeButton.attr('data-page', parseInt(page) + 1);
+                removeRedundantAll(removeButton, thumbnailName);
             } else {
                 const noticeHtml = "" +
-                        "<div class='notice notice-success is-dismissible'>" +
-                            "<p>" + removeRedundantSuccessNoticeText + "</p>" +
-                            "<button onclick='this.closest(\".notice\").remove()' type='button' class='notice-dismiss'><span class='screen-reader-text'>" + dismissNoticeText + "</span></button>" +
-                        "</div>" +
+                    "<div class='notice notice-success is-dismissible'>" +
+                    "<p>" + removeRedundantSuccessNoticeText + "</p>" +
+                    "<button onclick='this.closest(\".notice\").remove()' type='button' class='notice-dismiss'><span class='screen-reader-text'>" + dismissNoticeText + "</span></button>" +
+                    "</div>" +
                     "";
                 noticeWrapperHtml.append(noticeHtml);
                 removeButton.text(removeButtonText);
