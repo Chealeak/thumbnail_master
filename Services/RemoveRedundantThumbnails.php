@@ -35,7 +35,7 @@ class RemoveRedundantThumbnails extends Service
         add_action('wp_ajax_' . $this->prefix . 'remove_redundant_thumbnails', [$this, 'removeThumbnails']);
     }
 
-    public function removeThumbnails($thumbnailNameToRemove = null)
+    public function removeThumbnails()
     {
         $attachmentArgs = [
             'post_type'      => 'attachment',

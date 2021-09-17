@@ -76,7 +76,7 @@ function removeRedundantSingle(removeButton, thumbnailName) {
         success: function(data) {
             if (!data['completed']) {
                 removeButton.attr('data-page', parseInt(page) + 1);
-                removeRedundantAll(removeButton, thumbnailName);
+                removeRedundantSingle(removeButton, thumbnailName);
             } else {
                 const noticeHtml = "" +
                     "<div class='notice notice-success is-dismissible'>" +
