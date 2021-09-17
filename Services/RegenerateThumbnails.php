@@ -54,43 +54,30 @@ class RegenerateThumbnails extends Service
 
     public function regenerateWithAjax()
     {
-        $thumbnailName = null;
-
-        if (isset($_POST['thumbnailName'])) {
-            $thumbnailName = filter_var($_POST['thumbnailName'], FILTER_SANITIZE_STRING);
-        }
-
-        $this->regenerate($thumbnailName);
+        $this->regenerate();
 
         wp_die();
     }
 
-    public function regenerate($singleThumbnailName = null)
+    public function regenerate()
     {
         global $wpdb;
         $imagesExisted = $wpdb->get_results("SELECT ID FROM $wpdb->posts WHERE post_type='attachment' AND post_mime_type LIKE 'image/%'");
 
-        $this->prepareForRegeneration($singleThumbnailName);
+        $this->prepareForRegeneration();
 
         foreach ($imagesExisted as $image) {
             $this->regenerateSingleImage($image->ID);
         }
 
-        if (!is_null($singleThumbnailName) ) {
-            foreach ($this->storedThumbnailsInfo as $imageInfoName => $imageInfo)
-                if ($singleThumbnailName !== $imageInfoName) {
-                    add_image_size($imageInfoName, $imageInfo['width'], $imageInfo['height'], $imageInfo['crop']);
-                }
-        } else {
-            foreach ($this->storedThumbnailsInfo as $imageInfoName => $imageInfo) {
-                if (!$imageInfo['enabled']) {
-                    add_image_size($imageInfoName, $imageInfo['width'], $imageInfo['height'], $imageInfo['crop']);
-                }
+        foreach ($this->storedThumbnailsInfo as $imageInfoName => $imageInfo) {
+            if (!$imageInfo['enabled']) {
+                add_image_size($imageInfoName, $imageInfo['width'], $imageInfo['height'], $imageInfo['crop']);
             }
         }
     }
 
-    private function prepareForRegeneration($singleThumbnailName = null)
+    private function prepareForRegeneration()
     {
         $defaultImageSizesToRemove = [];
 
@@ -101,16 +88,9 @@ class RegenerateThumbnails extends Service
             }
         }
 
-        if (!is_null($singleThumbnailName) ) {
-            foreach ($this->storedThumbnailsInfo as $imageInfoName => $imageInfo)
-                if ($singleThumbnailName !== $imageInfoName) {
-                    remove_image_size($imageInfoName);
-                }
-        } else {
-            foreach ($this->storedThumbnailsInfo as $imageInfoName => $imageInfo) {
-                if (!$imageInfo['enabled']) {
-                    remove_image_size($imageInfoName);
-                }
+        foreach ($this->storedThumbnailsInfo as $imageInfoName => $imageInfo) {
+            if (!$imageInfo['enabled']) {
+                remove_image_size($imageInfoName);
             }
         }
 

@@ -1,6 +1,5 @@
 jQuery(document).ready(function() {
     jQuery('.th_m_regenerate-button-js').click(regenerate);
-    jQuery('.th_m_regenerate-single-button-js').click(regenerate);
 });
 
 function regenerate(event) {
