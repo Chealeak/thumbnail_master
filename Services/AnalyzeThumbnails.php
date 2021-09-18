@@ -52,23 +52,10 @@ class AnalyzeThumbnails extends Service
 
         $sectionTitle = '<h1 class="title is-4">' . __('Thumbnail Master', $this->textDomain) . '</h1>';
 
-        $allImages = '<h2 class="title is-6">' . __('All images', $this->textDomain) . '</h2>';
-        $allImages .= "
-            <div class='block'>
-                <div class='block'>
-                    <p><strong>" . __('Regenerate all active thumbnails', $this->textDomain) . "</strong></p>
-                    <button class='bulma-button is-info {$this->prefix}regenerate-button-js' data-in-process-text='" . __('Regenerating...', $this->textDomain) . "'>" . __('Regenerate All', $this->textDomain) . "</button>
-                </div>
-                
-                <div class='block'>
-                    <p><strong>" . __('Remove all redundant thumbnails that are not used in the system', $this->textDomain) . "</strong></p>
-                    <button class='bulma-button is-info {$this->prefix}remove-redundant-button-js' data-page='1' data-in-process-text='" . __('Removing...', $this->textDomain) . "'>" . __('Remove All', $this->textDomain) . "</button>
-                </div>
-            </div>
-        ";
+        $settings = '<h2 class="title is-6">' . __('Settings', $this->textDomain) . '</h2>';
 
-        $checkboxes = "<form method='post' action='options.php'>";
-        $checkboxes .= "
+        $settings .= "<form method='post' action='options.php'>";
+        $settings .= "
             <div class='block'>
                 <div class='block'>
                     <p><strong>" . __('Thumbnails are regenerated if they exist on a current page during the page rendering', $this->textDomain) . "</strong></p>
@@ -84,17 +71,32 @@ class AnalyzeThumbnails extends Service
                 </div>
             </div>
         ";
-        $checkboxes .= "<input type='submit' name='submit' id='submit' class='bulma-button is-link' value='Save Changes'></p>";
-        $checkboxes .= "</form>";
+        $settings .= "<input type='submit' name='submit' id='submit' class='bulma-button is-link' value='Save Changes'></p>";
+        $settings .= "</form>";
 
-        $table = '<h2 class="title is-6">' . __('Existed image sizes', $this->textDomain) . '</h2>';
+        $actions = '<h2 class="title is-6">' . __('Actions', $this->textDomain) . '</h2>';
+        $actions .= "
+            <div class='block'>
+                <div class='block'>
+                    <p><strong>" . __('Regenerate all active thumbnails', $this->textDomain) . "</strong></p>
+                    <button class='bulma-button is-info {$this->prefix}regenerate-button-js' data-in-process-text='" . __('Regenerating...', $this->textDomain) . "'>" . __('Regenerate', $this->textDomain) . "</button>
+                </div>
+                
+                <div class='block'>
+                    <p><strong>" . __('Remove all disabled redundant thumbnails that are not used in the system', $this->textDomain) . "</strong></p>
+                    <button class='bulma-button is-info {$this->prefix}remove-redundant-button-js' data-page='1' data-in-process-text='" . __('Removing...', $this->textDomain) . "'>" . __('Remove Redundant', $this->textDomain) . "</button>
+                </div>
+            </div>
+        ";
+
+        $table = '<h2 class="title is-6">' . __('Enable/disable image sizes', $this->textDomain) . '</h2>';
         $table .= '<table class="table is-bordered is-striped is-hoverable">';
 
         $table .= '<tr class="has-text-centered">';
         $table .= '<th>' . __('Name', $this->textDomain) . '</th>';
         $table .= '<th>' . __('Size', $this->textDomain) . '</th>';
         $table .= '<th>' . __('Crop', $this->textDomain) . '</th>';
-        $table .= '<th colspan="3">' . __('Actions', $this->textDomain) . '</th>';
+        $table .= '<th>' . __('Action', $this->textDomain) . '</th>';
         $table .= '</tr>';
 
         foreach ($this->storedThumbnailsInfo as $thumbnailName => $thumbnailInfo) {
@@ -120,7 +122,8 @@ class AnalyzeThumbnails extends Service
             $noticesWrapper .
             $sectionWrapperStart .
             $sectionTitle .
-            "<section class='box'>" . $allImages . $checkboxes . "</section>" .
+            "<section class='box'>" . $settings . "</section>" .
+            "<section class='box'>" . $actions . "</section>" .
             "<section class='box'>" . $table . "</section>" .
             $sectionWrapperEnd;
     }
