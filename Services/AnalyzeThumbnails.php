@@ -64,7 +64,6 @@ class AnalyzeThumbnails extends Service
                     <p><strong>" . __('Remove all redundant thumbnails that are not used in the system', $this->textDomain) . "</strong></p>
                     <button class='bulma-button is-info {$this->prefix}remove-redundant-button-js' data-page='1' data-in-process-text='" . __('Removing...', $this->textDomain) . "'>" . __('Remove All', $this->textDomain) . "</button>
                 </div>
-                <!--<button class='button button-primary'>Backup uploads</button>-->
             </div>
         ";
 
@@ -83,7 +82,6 @@ class AnalyzeThumbnails extends Service
                         <input type='checkbox'>
                     </label> 
                 </div>
-                <!--<div><input type='checkbox'>Enable WebP</div>-->
             </div>
         ";
         $checkboxes .= "<input type='submit' name='submit' id='submit' class='bulma-button is-link' value='Save Changes'></p>";
@@ -109,9 +107,6 @@ class AnalyzeThumbnails extends Service
             $table .= "
                 <td>
                     <button class='bulma-button $disableButtonExtraClass {$this->prefix}disable-button-js {$this->prefix}disable-button-{$thumbnailName}-js' data-thumbnail-name='" . $thumbnailName . "'>{$disableButtonTitle}</button>
-                </td>
-                <td>
-                    <button class='bulma-button is-info is-outlined {$this->prefix}remove-redundant-single-button-js' data-page='1' data-thumbnail-name='" . $thumbnailName . "' " . ($thumbnailInfo['enabled'] ? 'disabled' : '') . ">" . __('Remove Redundant', $this->textDomain) . "</button>
                 </td>
             ";
             $table .= '</tr>';
