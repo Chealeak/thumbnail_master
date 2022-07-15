@@ -63,12 +63,6 @@ class AnalyzeThumbnails extends Service
                         <input type='checkbox'>
                     </label>
                 </div>
-                <div class='block'>
-                    <p><strong>" . __('After enabling this option you will be allowed to use func function which will generate a picture tag for you', $this->textDomain) . "</strong></p>
-                    <label class='checkbox'>" . __('Enable responsive images', $this->textDomain) . "
-                        <input type='checkbox'>
-                    </label> 
-                </div>
             </div>
         ";
         $settings .= "<input type='submit' name='submit' id='submit' class='bulma-button is-link' value='Save Changes'></p>";
